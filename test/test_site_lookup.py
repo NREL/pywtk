@@ -22,5 +22,5 @@ class SiteLookupTest(TestCase):
         nearest_site = get_3tiersites_from_postgis(wkt)
         expected_meta = dict(zip(["gid","site_id","fraction_of_usable_area","power_curve","capacity","wind_speed","capacity_factor","the_geom","city","state","country","elevation"],
                 ["53253","53252","1.0","2","16.0","7.98","0.413","0101000020E6100000C5707500C4C259C0D07CCEDDAE394440","","Colorado","United States",]))
-        print nearest_site.items()
+        #print nearest_site.items()
         self.assertEqual(expected_meta['site_id'], str(nearest_site['site_id']))
