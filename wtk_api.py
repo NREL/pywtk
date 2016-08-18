@@ -139,6 +139,9 @@ def get_wind_data(site_id, start, end, attributes=None, leap_day=True, utc=False
     file_years = range(min_dt.year, max_dt.year+1)
     # Must pull data for each year from start to end
     for file_year in file_years:
+        if file_year < 2007 or file_year > 2012:
+            _logger.info("Skipping year that has no data: %s", file_year)
+            next
         _logger.info("pulling in %s"%(file_year))
         year_df = pandas.DataFrame()
         with h5py.File(WIND_MET_DIR+"/wtk_%s.h5"%file_year, "r") as h5_file:
@@ -154,6 +157,8 @@ def get_wind_data(site_id, start, end, attributes=None, leap_day=True, utc=False
             year_df = year_df.truncate(before=min_dt, after=max_dt)
             _logger.info("year_df shape is %s", repr(year_df.shape))
             ret_df = ret_df.append(year_df)
+    if leap_day == False:
+        ret_df = ret_df[~((ret_df.index.month == 2) & (ret_df.index.day == 29))]
     return ret_df
 
 def save_wind_data(datadict, zipfilename):
