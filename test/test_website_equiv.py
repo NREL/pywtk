@@ -4,9 +4,9 @@ import time
 from unittest import TestCase, skip
 from zipfile import ZipFile
 
-from wtk_api import get_wind_data, get_wind_data_by_wkt, get_3tiersites_from_wkt, get_nc_data, save_wind_data
+from wtk_api import get_wind_data_by_wkt, save_wind_data
 
-class TestPointWindData(TestCase):
+class TestWebsiteEquiv(TestCase):
     def test_point_url(self):
         '''Make sure POINT results match example data downloaded from
         https://mapsbeta.nrel.gov/api/developer_proxy
@@ -21,14 +21,16 @@ class TestPointWindData(TestCase):
         ''' Extra cruft
         &site_url=wind-toolkit%2Fwind%2Fwtk_download.json&full_name=Harry+Sorensen&email=harry.sorensen%40nrel.gov&affiliation=NREL&mailing_list=false&reason=Development+testing
         '''
-        wind_data = get_wind_data_by_wkt(wkt, names, attributes=attributes, leap_day=leap_day, utc=utc)
+        wind_dict = get_wind_data_by_wkt(wkt, names, attributes=attributes, leap_day=leap_day, utc=utc)
+        wind_data = wind_dict["53252"]
         #Year,Month,Day,Hour,Minute,density at hub height (kg/m^3),power (MW),surface air pressure (Pa),air temperature at 2m (K),wind direction at 100m (deg),wind speed at 100m (m/s)
         first_line = [2011,1,1,0,0,1.1320000000000001,15.359,85467.688,259.591,318.124,11.844]
         expected_dict = dict(zip(["density", "power", "pressure", "temperature", "wind_direction", "wind_speed"], first_line[5:]))
         self.assertEqual(expected_dict, wind_data.ix[0].to_dict())
         self.assertEqual(365*24*12, len(wind_data))
         utc = True
-        wind_data = get_wind_data_by_wkt(wkt, ["2011"], attributes=attributes, leap_day=leap_day, utc=utc)
+        wind_dict = get_wind_data_by_wkt(wkt, ["2011"], attributes=attributes, leap_day=leap_day, utc=utc)
+        wind_data = wind_dict["53252"]
         first_line = [2011,1,1,0,0,1.1420000000000001,15.991,85195.768,257.153,322.557,14.126]
         expected_dict = dict(zip(["density", "power", "pressure", "temperature", "wind_direction", "wind_speed"], first_line[5:]))
         self.assertEqual(expected_dict, wind_data.ix[0].to_dict())
@@ -74,20 +76,4 @@ class TestPointWindData(TestCase):
         '''
         print "CO save data"
         wind_data = get_wind_data(wkt, names, attributes=attributes, leap_day=leap_day, utc=utc)
-        save_wind_data({53252:wind_data}, "output_CO_test_point_2011_utc.zip")
-
-    @skip
-    def test_site_nc(self):
-        '''Match site example data downloaded from
-        https://mapsbeta.nrel.gov/api/developer_proxy
-        '''
-        # UTC
-        t_start = calendar.timegm((2011,1,1,0,0,0))
-        t_end = calendar.timegm((2011,12,31,23,55,0))
-        # Local
-        t_start = time.mktime((2011, 1, 1, 0, 0, 0, 0, 0, 0))
-        t_end = time.mktime((2011, 12, 31, 23, 55, 0, 0, 0, 0))
-        attributes = ["power", "wind_direction", "wind_speed", "temperature",
-                      "pressure","density"]
-        nc_data = get_nc_data(53252, t_start, t_end, attributes)
-        print nc_data
+        save_wind_data({"53252":wind_data}, "output_CO_test_point_2011_utc.zip")

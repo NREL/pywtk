@@ -33,26 +33,29 @@ _logger.info("Loaded %s timezones in %s seconds", len(timezones), time.time()-ts
 def get_3tiersites_from_wkt(wkt_str):
     '''Retrieve 3tier windsite ids from wkt
 
-    Returns: String of site_id closest to point'''
+    Returns: List of site_id Strings representing those closest to point or
+             within a polygon'''
+    ret_sites = []
     if 'POINT' in wkt_str:
         point = wkt.loads(wkt_str)
         min_dist, min_key = min((point.distance(v['point']), k) for (k, v) in sites.items())
-        return sites[min_key]
+        ret_sites.append(sites[min_key])
     else:
         rect = wkt.loads(wkt_str)
-        contained_sites = [k for (k,v) in sites.items() if rect.contains(v['point'])]
-        return contained_sites
-    #TODO: Sites within a shape
+        ret_sites = [k for (k,v) in sites.items() if rect.contains(v['point'])]
+    return ret_sites
 
 
 def get_3tiersites_from_postgis(wkt):
     '''Return list of sites data within the geometry defined in wtk from postgis
-
+        Kept as a simple test of existing functionality on the website, not to
+        be used for production
     Args:
         wkt - (String) Well Known Text describing a point of area for use in GIS
               mapping to wind sites
     Returns:
-        String of site_id closest to point
+        List of site_id dicts representing those closest to point or within a
+        polygon
     '''
     try:
         conn = psycopg2.connect("dbname=opencarto_development user=opencarto_app host=maps-dev-db.nrel.gov password=I7uHpKulUVkOatClZ7UF")
@@ -76,5 +79,5 @@ def get_3tiersites_from_postgis(wkt):
                  LIMIT 50000""".format(attributes, table_name, geometry_column, wkt)
     _logger.info("Querying metadata with '%s'", cmd)
     cur.execute(cmd)
-    matching_sites = cur.fetchall()
-    return matching_sites[0]
+    matching_sites = list(cur.fetchall())
+    return matching_sites
