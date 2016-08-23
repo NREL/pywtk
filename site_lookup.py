@@ -18,10 +18,7 @@ with open('three_tier_site_metadata.csv') as csvfile:
     metadata = csv.DictReader(csvfile)
     for row in metadata:
         point = wkb.loads(row['the_geom'], hex=True)
-        #point.metadata = row
         row['point'] = point
-        #row['Latitude'] = point.y
-        #row['Longitude'] = point.x
         sites[row['site_id']] = row
 _logger.info("Loaded %s sites in %s seconds", len(sites), time.time()-tstart)
 tstart = time.time()
@@ -36,15 +33,15 @@ _logger.info("Loaded %s timezones in %s seconds", len(timezones), time.time()-ts
 def get_3tiersites_from_wkt(wkt_str):
     '''Retrieve 3tier windsite ids from wkt
 
-    Returns: dict of site closest to point'''
+    Returns: String of site_id closest to point'''
     if 'POINT' in wkt_str:
         point = wkt.loads(wkt_str)
         min_dist, min_key = min((point.distance(v['point']), k) for (k, v) in sites.items())
         return sites[min_key]
-        #min_dist, min_index = min((point.distance(geom), k) for (k, geom) in enumerate(sites))
-        #sites[min_index].metadata['Latitude'] = sites[min_index].y
-        #sites[min_index].metadata['Longitude'] = sites[min_index].x
-        #return sites[min_index].metadata
+    else:
+        rect = wkt.loads(wkt_str)
+        contained_sites = [k for (k,v) in sites.items() if rect.contains(v['point'])]
+        return contained_sites
     #TODO: Sites within a shape
 
 
@@ -55,7 +52,7 @@ def get_3tiersites_from_postgis(wkt):
         wkt - (String) Well Known Text describing a point of area for use in GIS
               mapping to wind sites
     Returns:
-        List of site data dicts
+        String of site_id closest to point
     '''
     try:
         conn = psycopg2.connect("dbname=opencarto_development user=opencarto_app host=maps-dev-db.nrel.gov password=I7uHpKulUVkOatClZ7UF")
