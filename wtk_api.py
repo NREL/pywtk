@@ -12,6 +12,11 @@ from zipfile import ZipFile
 from site_lookup import get_3tiersites_from_wkt, timezones, sites
 
 _logger = logging.getLogger(__name__)
+WIND_FCST_DIR = "/projects/hpc-apps/wtk/data/fcst_data"
+FORECAST_ATTRS = [ "day_ahead_power", "hour_ahead_power", "4_hour_ahead_power",
+                   "6_hour_ahead_power", "day_ahead_power_p90", "hour_ahead_power_p90",
+                   "4_hour_ahead_power_p90", "6_hour_ahead_power_p90", "day_ahead_power_p10",
+                   "hour_ahead_power_p10", "4_hour_ahead_power_p10", "6_hour_ahead_power_p10"]
 #VALID_ATTRS = set(['wind_speed', 'wind_direction', 'power', 'temperature',
 #                  'pressure', 'density'])
 # Order per output csvfile from website
@@ -187,6 +192,57 @@ def get_nc_data(site, start_time, end_time, attributes=None, leap_day=False,
     _logger.info("Reading %s:%s", first_dp, last_dp)
     ret_df = pandas.DataFrame()
     ret_df['timestamp'] = numpy.arange(start_time, end_time + 1, int(nc.sample_period))
+    for attr in attributes:
+        ret_df[attr] = nc[attr][first_dp:last_dp]
+    return ret_df
+
+def get_forecast_data(site_id, start, end, attributes=None, leap_day=True, utc=False):
+    '''Retrieve forecast data for a specific site for a range of times
+
+    Required Args:
+        site_id - (String) Wind site id
+        start - (pandas.Timestamp) Timestamp for start of data
+        end - (pandas.Timestamp) Timestamp for end of data
+        names - (List of Strings) List of year names
+
+    Optional Args:
+        attributes - (List of Strings) List of attributes to retrieve
+                      from the database.  Limited to FORECAST_ATTRS.  Defaults to
+                      all available.
+        leap_day - (boolean) Include leap day data or remove it.  Defaults to
+                   True, include leap day data
+        utc - (boolean) Keep as UTC or convert to local time.  Defaults to local
+
+    Returns:
+        Pandas dataframe containing requested data
+    '''
+    if attributes is None:
+        attributes = FORECAST_ATTRS
+    site = int(site_id)
+    site_tz = timezones[site_id]['zoneName']
+    _logger.info("Site %s is in %s", site_id, site_tz)
+    site_file = os.path.join(WIND_FCST_DIR, str(site/500), "%s.nc"%site)
+    _logger.info("Site file %s", site_file)
+    nc = netCDF4.Dataset(site_file)
+    min_dt = start.tz_convert('utc')
+    max_dt = end.tz_convert('utc')
+    _logger.info("After conversion dates are %s to %s", min_dt, max_dt)
+
+    start_time = min_dt.value // 10 ** 9
+    end_time = max_dt.value // 10 ** 9
+    first_dp = max(0, int((start_time - nc.start_time)/nc.sample_period))
+    # 61368 time data points in each .nc file
+    last_dp = min(61368, int((end_time - nc.start_time)/nc.sample_period) + 1)
+    _logger.info("Reading %s:%s", first_dp, last_dp)
+    ret_df = pandas.DataFrame()
+    # TODO: Convert timestamp to tz sensitive datetime.
+    ret_df['datetime'] = numpy.arange(start_time, end_time + 1, int(nc.sample_period))
+    #year_df['datetime'] = h5_file[H5_TIME_INDEX_NAME][:]
+    # Someone with better pandas skills will code this nicer
+    ret_df.index = pandas.to_datetime(ret_df.pop('datetime'))
+    ret_df.index = ret_df.index.tz_localize('utc')
+    if utc == False:
+        ret_df.index = ret_df.index.tz_convert(site_tz)
     for attr in attributes:
         ret_df[attr] = nc[attr][first_dp:last_dp]
     return ret_df
