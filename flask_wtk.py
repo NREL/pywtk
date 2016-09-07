@@ -2,7 +2,7 @@
 from flask import Flask, json, request, jsonify
 import pandas
 import traceback
-from wtk_api import get_wind_data
+from wtk_api import get_wind_data, get_forecast_data
 
 app = Flask(__name__)
 
@@ -47,6 +47,34 @@ def met_data():
     except:
         traceback.print_exc()
         raise
+
+@app.route("/fcst")
+def fcst_data():
+    '''Return forecast data from the hdf files
+    Kind of ugly that each of the sites data returns as a single string, but it's
+    how pandas encodes the json data that makes it hard to use anything else to
+    decode it.
+
+    Required parameters:
+        site_id - list of site_ids
+        start - unix timestamp of start time
+        end - unix timestamp of end time
+
+    Returns:
+        dict of site id to json representation of dataframes
+    '''
+    sites = request.args.getlist('site_id')
+    start = pandas.Timestamp(int(request.args['start']), unit="s", tz='utc')
+    end = pandas.Timestamp(int(request.args['end']), unit="s", tz='utc')
+    ret_dict = {}
+    try:
+        for site_id in sites:
+            ret_dict[site_id] = get_forecast_data(site_id, start, end).to_json()
+        return jsonify(ret_dict)
+    except:
+        traceback.print_exc()
+        raise
+
 
 
 if __name__ == '__main__':
