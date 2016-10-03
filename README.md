@@ -3,13 +3,13 @@ wtk-python-api
 
 Use of wtk data with a python interface
 
-## How to use
+## How to install
 Place the path to the cloned repository in the PYTHONPATH variable
 ```bash
 export PYTHONPATH=<path_to_wtk-python-api>:$PYTHONPATH
 ```
 
-## How to access
+## Available data and how to access it
 * Wind site metadata
 
   ```bash
