@@ -11,6 +11,23 @@ export PYTHONPATH=<path_to_wtk-python-api>:$PYTHONPATH
 
 ## How to access
 * Wind site metadata
+
+  ```bash
+$ python -c "import site_lookup, pprint; pprint.pprint(site_lookup.sites['11222'])"
+{'capacity': '16.0',
+ 'capacity_factor': '0.411',
+ 'city': '',
+ 'country': 'United States',
+ 'elevation': '',
+ 'fraction_of_usable_area': '1.0',
+ 'gid': '11223',
+ 'point': <shapely.geometry.point.Point object at 0x107dfc910>,
+ 'power_curve': '3',
+ 'site_id': '11222',
+ 'state': 'Texas',
+ 'the_geom': '0101000020E61000009414580053BA59C069FD2D01F8574040',
+ 'wind_speed': '7.34'}
+```
 * Wind site timezones
 * Available met data attributes
 
