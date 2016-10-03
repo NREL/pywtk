@@ -13,7 +13,17 @@ export PYTHONPATH=<path_to_wtk-python-api>:$PYTHONPATH
 * Wind site metadata
 * Wind site timezones
 * Available met data attributes
+
+  ```bash
+$ python -c "import wtk_api; print wtk_api.MET_ATTRS"
+['density', 'power', 'pressure', 'temperature', 'wind_direction', 'wind_speed']
+```
 * Available forecast data attributes
+
+  ```bash
+$ python -c "import wtk_api; print wtk_api.FORECAST_ATTRS"
+['day_ahead_power', 'hour_ahead_power', '4_hour_ahead_power', '6_hour_ahead_power', 'day_ahead_power_p90', 'hour_ahead_power_p90', '4_hour_ahead_power_p90', '6_hour_ahead_power_p90', 'day_ahead_power_p10', 'hour_ahead_power_p10', '4_hour_ahead_power_p10', '6_hour_ahead_power_p10']
+```
 * Lookup sites within a Well Known Text shape descriptor
 * Lookup site nearest a Well Known Text point
 * Retrieval of met data for multiple sites within a Well Known Text shape descriptor for specified attributes and timespan
