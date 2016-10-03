@@ -68,9 +68,9 @@ $ python -c "import site_lookup; print site_lookup.get_3tiersites_from_wkt('POLY
 $ python -c "import site_lookup; print site_lookup.get_3tiersites_from_wkt('POINT(-103.12 40.24)')"
 ['53252']
 ```
-* Retrieval of met data for multiple sites within a Well Known Text shape descriptor for specified attributes and timespan
+* Retrieval of met data for multiple sites for a Well Known Text descriptor for specified attributes and timespan
 * Retrieval of met data for a single site for specified attributes and timespan
-* Retrieval of forecast data for multiple sites within a Well Known Text shape descriptor for specified attributes and timespan
+* Retrieval of forecast data for multiple sites for a Well Known Text descriptor for specified attributes and timespan
 * Retrieval of forecast data for a single site for specified attributes and timespan
 
 ## Well Known Text descriptors
