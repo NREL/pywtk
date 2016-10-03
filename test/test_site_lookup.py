@@ -14,7 +14,7 @@ class SiteLookupTest(TestCase):
                 ["53253","53252","1.0","2","16.0","7.98","0.413","0101000020E6100000C5707500C4C259C0D07CCEDDAE394440","","Colorado","United States",]))
         #print nearest_site
         self.assertEqual(1, len(nearest_site))
-        self.assertEqual(expected_meta['site_id'], nearest_site[0]['site_id'])
+        self.assertEqual(expected_meta['site_id'], nearest_site[0])
 
     def test_point_postgis(self):
         '''Validate return of the nearest point to a WKT using postgis

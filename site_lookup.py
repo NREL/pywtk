@@ -41,7 +41,7 @@ def get_3tiersites_from_wkt(wkt_str):
     if 'POINT' in wkt_str:
         point = wkt.loads(wkt_str)
         min_dist, min_key = min((point.distance(v['point']), k) for (k, v) in sites.items())
-        ret_sites.append(sites[min_key])
+        ret_sites.append(min_key)
     else:
         rect = wkt.loads(wkt_str)
         ret_sites = [k for (k,v) in sites.items() if rect.contains(v['point'])]
