@@ -22,7 +22,7 @@ FORECAST_ATTRS = [ "day_ahead_power", "hour_ahead_power", "4_hour_ahead_power",
 # Order per output csvfile from website
 # density at hub height (kg/m^3),power (MW),surface air pressure (Pa),air
 # temperature at 2m (K),wind direction at 100m (deg),wind speed at 100m (m/s)
-VALID_ATTRS = ['density', 'power', 'pressure', 'temperature', 'wind_direction',
+MET_ATTRS = ['density', 'power', 'pressure', 'temperature', 'wind_direction',
                'wind_speed']
 WIND_MET_DIR = "/projects/hpc-apps/wtk/data/hdf"
 WIND_NC_DIR = "/projects/hpc-apps/wtk/data/met_data"
@@ -49,7 +49,7 @@ def get_wind_data_by_wkt(wkt, names, attributes=None, interval=5, leap_day=False
 
     Optional Args:
         attributes - (String or List of Strings) List of attributes to retrieve
-                      from the database.  Limited to VALID_ATTRS.
+                      from the database.  Limited to MET_ATTRS.
         interval - Limited to H5_AVAILABLE_DATA_INTERVALS
         leap_day - (boolean) Include leap day data or remove it.  Defaults to
                    True, include leap day data
@@ -59,8 +59,7 @@ def get_wind_data_by_wkt(wkt, names, attributes=None, interval=5, leap_day=False
         dict of site_id to Pandas dataframe containing requested data
     '''
     ret_dict = {}
-    for site in get_3tiersites_from_wkt(wkt):
-        site_id = site['site_id']
+    for site_id in get_3tiersites_from_wkt(wkt):
         site_tz = timezones[site_id]['zoneName']
         _logger.info("Site %s is in %s", site_id, site_tz)
         ret_df = pandas.DataFrame()
@@ -88,7 +87,7 @@ def get_wind_data(site_id, start, end, attributes=None, leap_day=True, utc=False
 
     Optional Args:
         attributes - (String or List of Strings) List of attributes to retrieve
-                      from the database.  Limited to VALID_ATTRS.  Defaults to
+                      from the database.  Limited to MET_ATTRS.  Defaults to
                       all available.
         leap_day - (boolean) Include leap day data or remove it.  Defaults to
                    True, include leap day data
@@ -98,7 +97,7 @@ def get_wind_data(site_id, start, end, attributes=None, leap_day=True, utc=False
         Pandas dataframe containing requested data
     '''
     if attributes is None:
-        attributes = VALID_ATTRS
+        attributes = MET_ATTRS
     site_tz = timezones[site_id]['zoneName']
     _logger.info("Site %s is in %s", site_id, site_tz)
     ret_df = pandas.DataFrame()
@@ -176,7 +175,7 @@ def get_nc_data(site, start_time, end_time, attributes=None, leap_day=False,
 
     Optional Args:
         attributes - (String or List of Strings) List of attributes to retrieve
-                      from the database.  Limited to VALID_ATTRS.
+                      from the database.  Limited to MET_ATTRS.
         leap_day - (NOT IMPLEMENTED) Include leap day in data
         utc - (NOT IMPLEMENTED) (boolean) Keep as UTC or convert to local time.
               Defaults to local

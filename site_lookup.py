@@ -2,6 +2,7 @@
 site to a point and a list of sites within a sshape'''
 import csv
 import logging
+import os
 import psycopg2
 import psycopg2.extras
 from shapely import wkb, wkt
@@ -10,11 +11,12 @@ import time
 import traceback
 
 _logger = logging.getLogger(__name__)
+_dir = os.path.dirname(__file__)
 # Loading the module will read in the file and create the Points as they
 # will not change
 tstart = time.time()
 sites = {}
-with open('three_tier_site_metadata.csv') as csvfile:
+with open(os.path.join(_dir, 'three_tier_site_metadata.csv')) as csvfile:
     metadata = csv.DictReader(csvfile)
     for row in metadata:
         point = wkb.loads(row['the_geom'], hex=True)
@@ -23,7 +25,7 @@ with open('three_tier_site_metadata.csv') as csvfile:
 _logger.info("Loaded %s sites in %s seconds", len(sites), time.time()-tstart)
 tstart = time.time()
 timezones = {}
-with open('site_timezone.csv') as csvfile:
+with open(os.path.join(_dir, 'site_timezone.csv')) as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
         timezones[row['site_id']] = row
@@ -39,7 +41,7 @@ def get_3tiersites_from_wkt(wkt_str):
     if 'POINT' in wkt_str:
         point = wkt.loads(wkt_str)
         min_dist, min_key = min((point.distance(v['point']), k) for (k, v) in sites.items())
-        ret_sites.append(sites[min_key])
+        ret_sites.append(min_key)
     else:
         rect = wkt.loads(wkt_str)
         ret_sites = [k for (k,v) in sites.items() if rect.contains(v['point'])]
