@@ -68,7 +68,17 @@ $ python -c "import site_lookup; print site_lookup.get_3tiersites_from_wkt('POLY
 $ python -c "import site_lookup; print site_lookup.get_3tiersites_from_wkt('POINT(-103.12 40.24)')"
 ['53252']
 ```
-* Retrieval of met data for multiple sites for a Well Known Text descriptor for specified attributes and timespan
+* Retrieval of met data for multiple sites for a Well Known Text descriptor for specified attributes and year
+
+  ```python
+import pandas
+import wtk_api
+wkt = 'POLYGON((-120.82 34.4,-119.19 34.4,-119.19 33.92,-120.82 33.92,-120.82 34.4))'
+years = ['2008']
+attributes = ['power', 'wind_speed']
+wind_data = wtk_api.get_wind_data_by_wkt(wkt, years, attributes=attributes)
+print(wind_data.info())
+```
 * Retrieval of met data for a single site for specified attributes and timespan
 
   ```python
