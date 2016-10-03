@@ -29,6 +29,21 @@ $ python -c "import site_lookup, pprint; pprint.pprint(site_lookup.sites['11222'
  'wind_speed': '7.34'}
 ```
 * Wind site timezones
+
+  ```bash
+$ python -c "import site_lookup, pprint; pprint.pprint(site_lookup.timezones['11222'])"
+{'abbreviation': 'CDT',
+ 'countryCode': 'US',
+ 'countryName': 'United States',
+ 'dst': '1',
+ 'dstEnd': '1478415600',
+ 'dstStart': '1457856000',
+ 'gmtOffset': '-18000',
+ 'nextAbbreviation': 'CST',
+ 'site_id': '11222',
+ 'timestamp': '1470316655',
+ 'zoneName': 'America/Chicago'}
+```
 * Available met data attributes
 
   ```bash
