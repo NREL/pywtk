@@ -70,6 +70,17 @@ $ python -c "import site_lookup; print site_lookup.get_3tiersites_from_wkt('POIN
 ```
 * Retrieval of met data for multiple sites for a Well Known Text descriptor for specified attributes and timespan
 * Retrieval of met data for a single site for specified attributes and timespan
+
+  ```python
+import pandas
+import wtk_api
+start = pandas.Timestamp('2007-08-01', tz='utc')
+end = pandas.Timestamp('2007-08-15', tz='utc')
+attributes = ['power', 'wind_speed']
+wind_data = wtk_api.get_wind_data("102445", start, end, attributes=attributes)
+
+```
+
 * Retrieval of forecast data for multiple sites for a Well Known Text descriptor for specified attributes and timespan
 * Retrieval of forecast data for a single site for specified attributes and timespan
 
