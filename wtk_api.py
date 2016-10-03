@@ -59,8 +59,7 @@ def get_wind_data_by_wkt(wkt, names, attributes=None, interval=5, leap_day=False
         dict of site_id to Pandas dataframe containing requested data
     '''
     ret_dict = {}
-    for site in get_3tiersites_from_wkt(wkt):
-        site_id = site['site_id']
+    for site_id in get_3tiersites_from_wkt(wkt):
         site_tz = timezones[site_id]['zoneName']
         _logger.info("Site %s is in %s", site_id, site_tz)
         ret_df = pandas.DataFrame()
