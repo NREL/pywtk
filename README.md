@@ -70,6 +70,7 @@ $ python -c "import site_lookup; print site_lookup.get_3tiersites_from_wkt('POIN
 ```
 * Retrieval of met data for multiple sites within a Well Known Text shape descriptor for specified attributes and timespan
 * Retrieval of met data for a single site for specified attributes and timespan
+* Retrieval of forecast data for multiple sites within a Well Known Text shape descriptor for specified attributes and timespan
 * Retrieval of forecast data for a single site for specified attributes and timespan
 
 ## Well Known Text descriptors
