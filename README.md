@@ -78,6 +78,17 @@ start = pandas.Timestamp('2007-08-01', tz='utc')
 end = pandas.Timestamp('2007-08-15', tz='utc')
 attributes = ['power', 'wind_speed']
 wind_data = wtk_api.get_wind_data("102445", start, end, attributes=attributes)
+print(wind_data.info())
+```
+  ```text
+<class 'pandas.core.frame.DataFrame'>
+DatetimeIndex: 4033 entries, 2007-07-31 20:00:00-04:00 to 2007-08-14 20:00:00-04:00
+Data columns (total 2 columns):
+power         4033 non-null float64
+wind_speed    4033 non-null float64
+dtypes: float64(2)
+memory usage: 94.5 KB
+None
 ```
 * Retrieval of forecast data for multiple sites for a Well Known Text descriptor for specified attributes and timespan
 * Retrieval of forecast data for a single site for specified attributes and timespan
