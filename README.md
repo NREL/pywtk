@@ -3,13 +3,13 @@ wtk-python-api
 
 Use of wtk data with a python interface
 
-## How to use
+## How to install
 Place the path to the cloned repository in the PYTHONPATH variable
 ```bash
 export PYTHONPATH=<path_to_wtk-python-api>:$PYTHONPATH
 ```
 
-## How to access
+## Available data and how to access it
 * Wind site metadata
 
   ```bash
@@ -68,8 +68,29 @@ $ python -c "import site_lookup; print site_lookup.get_3tiersites_from_wkt('POLY
 $ python -c "import site_lookup; print site_lookup.get_3tiersites_from_wkt('POINT(-103.12 40.24)')"
 ['53252']
 ```
-* Retrieval of met data for multiple sites within a Well Known Text shape descriptor for specified attributes and timespan
+* Retrieval of met data for multiple sites for a Well Known Text descriptor for specified attributes and timespan
 * Retrieval of met data for a single site for specified attributes and timespan
+
+  ```python
+import pandas
+import wtk_api
+start = pandas.Timestamp('2007-08-01', tz='utc')
+end = pandas.Timestamp('2007-08-15', tz='utc')
+attributes = ['power', 'wind_speed']
+wind_data = wtk_api.get_wind_data("102445", start, end, attributes=attributes)
+print(wind_data.info())
+```
+  ```text
+<class 'pandas.core.frame.DataFrame'>
+DatetimeIndex: 4033 entries, 2007-07-31 20:00:00-04:00 to 2007-08-14 20:00:00-04:00
+Data columns (total 2 columns):
+power         4033 non-null float64
+wind_speed    4033 non-null float64
+dtypes: float64(2)
+memory usage: 94.5 KB
+None
+```
+* Retrieval of forecast data for multiple sites for a Well Known Text descriptor for specified attributes and timespan
 * Retrieval of forecast data for a single site for specified attributes and timespan
 
 ## Well Known Text descriptors
