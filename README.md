@@ -114,7 +114,25 @@ None
 ```
 * Retrieval of forecast data for multiple sites for a Well Known Text descriptor for specified attributes and timespan
 * Retrieval of forecast data for a single site for specified attributes and timespan
-
+  ```python
+import pandas
+import wtk_api
+start = pandas.Timestamp('2007-08-01', tz='utc')
+end = pandas.Timestamp('2007-08-15', tz='utc')
+attributes = ['hour_ahead_power', 'day_ahead_power']
+wind_data = wtk_api.get_forecast_data("102445", start, end, attributes=attributes)
+print(wind_data.info())
+```
+  ```text
+<class 'pandas.core.frame.DataFrame'>
+DatetimeIndex: 337 entries, 2007-07-31 20:00:00-04:00 to 2007-08-14 20:00:00-04:00
+Data columns (total 2 columns):
+hour_ahead_power    337 non-null float32
+day_ahead_power     337 non-null float32
+dtypes: float32(2)
+memory usage: 5.3 KB
+None
+```
 ## Well Known Text descriptors
 The WKT descriptor should follow the [SQL spec](http://www.opengeospatial.org/standards/sfs).  The following are examples
 of a polygon and point definitions:
