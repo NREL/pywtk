@@ -36,7 +36,7 @@ H5_DATA_INTERVAL = 60
 H5_AVAILABLE_DATA_INTERVALS = [60]
 
 def get_wind_data_by_wkt(wkt, names, attributes=None, interval=5, leap_day=False,
-                  utc=False, type="met"):
+                  utc=False, dataset="met"):
     '''Duplicate functionality of URL data grabber at
     https://mapsbeta.nrel.gov/api/developer_proxy
 
@@ -54,14 +54,14 @@ def get_wind_data_by_wkt(wkt, names, attributes=None, interval=5, leap_day=False
         leap_day - (boolean) Include leap day data or remove it.  Defaults to
                    True, include leap day data
         utc - (boolean) Keep as UTC or convert to local time.  Defaults to local
-        type - (String) Data type to retrieve, met or forecast.  Defaults to met
+        dataset - (String) Dataset to retrieve, met or forecast.  Defaults to met
 
     Returns:
         dict of site_id to Pandas dataframe containing requested data
     '''
-    if type == "met":
+    if dataset == "met":
         data_function = get_wind_data
-    elif type == "forecast":
+    elif dataset == "forecast":
         data_function = get_forecast_data
     else:
         raise Exception("Invalid data to retrieve: %s"%type)

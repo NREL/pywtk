@@ -48,7 +48,7 @@ class TestGetForecastData(TestCase):
         '''Test retrieval of data based on wkt
         '''
         wkt = 'POINT(-103.0432 40.4506)'
-        fcst_dict = get_wind_data_by_wkt(wkt, ["2007"], utc=True, type="forecast")
+        fcst_dict = get_wind_data_by_wkt(wkt, ["2007"], utc=True, dataset="forecast")
         self.assertIn("53252", fcst_dict)
         fcst_data = fcst_dict["53252"]
         start = pandas.Timestamp('2007-01-01', tz='UTC')
