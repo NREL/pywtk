@@ -113,6 +113,17 @@ memory usage: 94.5 KB
 None
 ```
 * Retrieval of forecast data for multiple sites for a Well Known Text descriptor for specified attributes and timespan
+  ```python
+import pandas
+import wtk_api
+wkt = 'POLYGON((-120.82 34.4,-119.19 34.4,-119.19 33.92,-120.82 33.92,-120.82 34.4))'
+years = ['2008']
+attributes = ['hour_ahead_power', 'day_ahead_power']
+wind_data = wtk_api.get_wind_data(wkt, years, attributes=attributes, type="forecast")
+print(wind_data.info())
+```
+  ```text
+```
 * Retrieval of forecast data for a single site for specified attributes and timespan
 
   ```python
