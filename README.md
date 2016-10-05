@@ -112,7 +112,7 @@ dtypes: float64(2)
 memory usage: 94.5 KB
 None
 ```
-* Retrieval of forecast data for multiple sites for a Well Known Text descriptor for specified attributes and timespan
+* Retrieval of forecast data for multiple sites for a Well Known Text descriptor for specified attributes and years
 
   ```python
 import pandas
