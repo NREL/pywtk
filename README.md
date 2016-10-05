@@ -68,7 +68,29 @@ $ python -c "import site_lookup; print site_lookup.get_3tiersites_from_wkt('POLY
 $ python -c "import site_lookup; print site_lookup.get_3tiersites_from_wkt('POINT(-103.12 40.24)')"
 ['53252']
 ```
-* Retrieval of met data for multiple sites for a Well Known Text descriptor for specified attributes and timespan
+* Retrieval of met data for multiple sites for a Well Known Text descriptor for specified attributes and year
+
+  ```python
+import pandas
+import wtk_api
+wkt = 'POLYGON((-120.82 34.4,-119.19 34.4,-119.19 33.92,-120.82 33.92,-120.82 34.4))'
+years = ['2008']
+attributes = ['power', 'wind_speed']
+wind_data = wtk_api.get_wind_data_by_wkt(wkt, years, attributes=attributes)
+print(wind_data.keys())
+print(wind_data['31563'].info())
+```
+  ```text
+['31563', '31324', '30713', '33203', '30874', '31320', '31321', '31322', '31323', '31192', '31191', '31190', '29375', '30712', '32834', '30190', '30019', '31033', '29872', '31189', '30873', '32060', '29733', '31034', '31032', '30539']
+<class 'pandas.core.frame.DataFrame'>
+DatetimeIndex: 105120 entries, 2008-01-01 00:00:00-08:00 to 2008-12-31 23:55:00-08:00
+Data columns (total 2 columns):
+power         105120 non-null float64
+wind_speed    105120 non-null float64
+dtypes: float64(2)
+memory usage: 2.4 MB
+None
+```
 * Retrieval of met data for a single site for specified attributes and timespan
 
   ```python
@@ -93,11 +115,31 @@ None
 * Retrieval of forecast data for multiple sites for a Well Known Text descriptor for specified attributes and timespan
 * Retrieval of forecast data for a single site for specified attributes and timespan
 
+  ```python
+import pandas
+import wtk_api
+start = pandas.Timestamp('2007-08-01', tz='utc')
+end = pandas.Timestamp('2007-08-15', tz='utc')
+attributes = ['hour_ahead_power', 'day_ahead_power']
+wind_data = wtk_api.get_forecast_data("102445", start, end, attributes=attributes)
+print(wind_data.info())
+```
+  ```text
+<class 'pandas.core.frame.DataFrame'>
+DatetimeIndex: 337 entries, 2007-07-31 20:00:00-04:00 to 2007-08-14 20:00:00-04:00
+Data columns (total 2 columns):
+hour_ahead_power    337 non-null float32
+day_ahead_power     337 non-null float32
+dtypes: float32(2)
+memory usage: 5.3 KB
+None
+```
 ## Well Known Text descriptors
 The WKT descriptor should follow the [SQL spec](http://www.opengeospatial.org/standards/sfs).  The following are examples
 of a polygon and point definitions:
 #### Polygon
-```python
+
+  ```python
 min_lng = -120.82
 max_lng = -119.19
 min_lat = 33.92
@@ -105,7 +147,8 @@ max_lat = 34.4
 wkt = "POLYGON(({0} {3},{1} {3},{1} {2},{0} {2},{0} {3}))".format(min_lng, max_lng, min_lat, max_lat)
 ```
 #### Point
-```python
+
+  ```python
 pt_lng = -103.12
 pt_lat = 40.24
 wkt = "POINT({0} {1})".format(pt_lng, pt_lat)
