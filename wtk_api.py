@@ -36,7 +36,7 @@ H5_DATA_INTERVAL = 60
 H5_AVAILABLE_DATA_INTERVALS = [60]
 
 def get_wind_data_by_wkt(wkt, names, attributes=None, interval=5, leap_day=False,
-                  utc=False):
+                  utc=False, type="met"):
     '''Duplicate functionality of URL data grabber at
     https://mapsbeta.nrel.gov/api/developer_proxy
 
@@ -54,10 +54,17 @@ def get_wind_data_by_wkt(wkt, names, attributes=None, interval=5, leap_day=False
         leap_day - (boolean) Include leap day data or remove it.  Defaults to
                    True, include leap day data
         utc - (boolean) Keep as UTC or convert to local time.  Defaults to local
+        type - (String) Data type to retrieve, met or forecast.  Defaults to met
 
     Returns:
         dict of site_id to Pandas dataframe containing requested data
     '''
+    if type == "met":
+        data_function = get_wind_data
+    elif type == "forecast":
+        data_function = get_forecast_data
+    else:
+        raise Exception("Invalid data to retrieve: %s"%type)
     ret_dict = {}
     for site_id in get_3tiersites_from_wkt(wkt):
         site_tz = timezones[site_id]['zoneName']
@@ -72,7 +79,7 @@ def get_wind_data_by_wkt(wkt, names, attributes=None, interval=5, leap_day=False
             else:
                 min_dt = pandas.Timestamp('%s-01-01'%year, tz='utc')
                 max_dt = pandas.Timestamp('%s-12-31 23:59:59'%year, tz='utc')
-            ret_df = ret_df.append(get_wind_data(site_id, min_dt, max_dt, attributes, leap_day, utc))
+            ret_df = ret_df.append(data_function(site_id, min_dt, max_dt, attributes, leap_day, utc))
         ret_dict[site_id] = ret_df
     return ret_dict
 
