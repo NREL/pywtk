@@ -112,7 +112,7 @@ dtypes: float64(2)
 memory usage: 94.5 KB
 None
 ```
-* Retrieval of forecast data for multiple sites for a Well Known Text descriptor for specified attributes and timespan
+* Retrieval of forecast data for multiple sites for a Well Known Text descriptor for specified attributes and years
 
   ```python
 import pandas
@@ -120,10 +120,20 @@ import wtk_api
 wkt = 'POLYGON((-120.82 34.4,-119.19 34.4,-119.19 33.92,-120.82 33.92,-120.82 34.4))'
 years = ['2008']
 attributes = ['hour_ahead_power', 'day_ahead_power']
-wind_data = wtk_api.get_wind_data(wkt, years, attributes=attributes, type="forecast")
-print(wind_data.info())
+wind_data = wtk_api.get_wind_data_by_wkt(wkt, years, attributes=attributes, dataset="forecast", utc=True)
+print(wind_data.keys())
+print(wind_data['31563'].info())
 ```
   ```text
+['31563', '31324', '30713', '33203', '30874', '31320', '31321', '31322', '31323', '31192', '31191', '31190', '29375', '30712', '32834', '30190', '30019', '31033', '29872', '31189', '30873', '32060', '29733', '31034', '31032', '30539']
+<class 'pandas.core.frame.DataFrame'>
+DatetimeIndex: 8784 entries, 2008-01-01 00:00:00+00:00 to 2008-12-31 23:00:00+00:00
+Data columns (total 2 columns):
+hour_ahead_power    8784 non-null float32
+day_ahead_power     8784 non-null float32
+dtypes: float32(2)
+memory usage: 137.2 KB
+None
 ```
 * Retrieval of forecast data for a single site for specified attributes and timespan
 
