@@ -242,7 +242,7 @@ def get_forecast_data(site_id, start, end, attributes=None, leap_day=True, utc=F
     _logger.info("Reading %s:%s", first_dp, last_dp)
     ret_df = pandas.DataFrame()
     # TODO: Convert timestamp to tz sensitive datetime.
-    ret_df['datetime'] = numpy.arange(min_dt.value, max_dt.value + 1, int(nc.sample_period) * 10 ** 9)
+    ret_df['datetime'] = numpy.arange(min_dt.value, max_dt.value + 10 ** 9, int(nc.sample_period) * 10 ** 9)
     #year_df['datetime'] = h5_file[H5_TIME_INDEX_NAME][:]
     # Someone with better pandas skills will code this nicer
     ret_df.index = pandas.to_datetime(ret_df.pop('datetime'))

@@ -9,6 +9,16 @@ from zipfile import ZipFile
 from wtk_api import get_forecast_data, get_wind_data_by_wkt, FORECAST_ATTRS
 
 class TestGetForecastData(TestCase):
+    def test_multiple_years(self):
+        '''Match site data from forecast nc files for multiple years
+        '''
+        # UTC
+        start = pandas.Timestamp('2007-01-01', tz='utc')
+        end = pandas.Timestamp('2008-08-02', tz='utc')
+        fcst_data = get_forecast_data("53252", start, end, utc=True)
+        self.assertEqual(start, fcst_data.index[0])
+        self.assertEqual(end, fcst_data.index[-1])
+
     def test_partial_year(self):
         '''Match site data from forecast nc files
         '''
