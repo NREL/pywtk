@@ -4,6 +4,15 @@ wtk-python-api
 Use of wtk data with a python interface
 
 ## How to install
+
+Create a conda environment
+
+```bash
+module purge; module load conda 
+conda env update -n wtk-python-api
+source activate wtk-python-api
+```
+
 Place the path to the cloned repository in the PYTHONPATH variable
 ```bash
 export PYTHONPATH=<path_to_wtk-python-api>:$PYTHONPATH
