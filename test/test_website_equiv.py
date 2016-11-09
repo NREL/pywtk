@@ -4,7 +4,7 @@ import time
 from unittest import TestCase, skip
 from zipfile import ZipFile
 
-from wtk_api import get_wind_data_by_wkt, save_wind_data
+from pywtk.wtk_api import get_wind_data_by_wkt, save_wind_data
 
 class TestWebsiteEquiv(TestCase):
     def test_point_url(self):

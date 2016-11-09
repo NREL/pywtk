@@ -2,7 +2,7 @@
 from flask import Flask, json, request, jsonify
 import pandas
 import traceback
-from wtk_api import get_wind_data, get_forecast_data
+from pywtk.wtk_api import get_wind_data, get_forecast_data
 
 app = Flask(__name__)
 

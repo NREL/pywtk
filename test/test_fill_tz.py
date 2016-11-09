@@ -1,14 +1,12 @@
 import csv
 from unittest import TestCase, skip
-from fill_tz import fill_tz, get_tz_for_site, save_tz_to_file
-
-from site_lookup import get_3tiersites_from_wkt, get_3tiersites_from_postgis
 
 class TimezoneTest(TestCase):
     @skip('Will modify existing data')
     def test_tz_for_site(self):
         '''Validate timezone for sites
         '''
+        from fill_tz import fill_tz, get_tz_for_site, save_tz_to_file
         #SiteID, 102445.0
         #Longitude, -70.708649
         #Latitude, 41.744591

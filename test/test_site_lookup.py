@@ -2,7 +2,7 @@ import csv
 from unittest import TestCase
 from zipfile import ZipFile
 
-from site_lookup import get_3tiersites_from_wkt, get_3tiersites_from_postgis
+from pywtk.site_lookup import get_3tiersites_from_wkt, get_3tiersites_from_postgis
 
 class SiteLookupTest(TestCase):
     def test_point_metadata(self):

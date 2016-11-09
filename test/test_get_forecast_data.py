@@ -6,7 +6,7 @@ import time
 from unittest import TestCase, skip
 from zipfile import ZipFile
 
-from wtk_api import get_forecast_data, get_wind_data_by_wkt, FORECAST_ATTRS
+from pywtk.wtk_api import get_forecast_data, get_wind_data_by_wkt, FORECAST_ATTRS
 
 class TestGetForecastData(TestCase):
     def test_multiple_years(self):

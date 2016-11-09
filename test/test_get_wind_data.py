@@ -5,7 +5,7 @@ import time
 from unittest import TestCase, skip
 from zipfile import ZipFile
 
-from wtk_api import get_wind_data, get_wind_data_by_wkt, get_3tiersites_from_wkt, get_nc_data, save_wind_data
+from pywtk.wtk_api import get_wind_data, get_wind_data_by_wkt, get_3tiersites_from_wkt, get_nc_data, save_wind_data
 
 class TestGetWindData(TestCase):
     def test_part_year(self):

@@ -3,7 +3,7 @@ import numpy
 import pandas
 from unittest import TestCase, skip
 import flask_wtk
-from wtk_api import FORECAST_ATTRS
+from pywtk.wtk_api import FORECAST_ATTRS
 
 class TestFlaskWTK(TestCase):
     def setUp(self):
