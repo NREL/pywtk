@@ -36,5 +36,5 @@ def get_3tiersites_from_wkt(wkt_str):
         sites['distance'] = sites['point'].apply(shape.distance)
         ret_sites = sites.sort_values('distance', ascending=True)
     else:
-        ret_sites = sites.loc[lambda df: df['point'].apply(shape.contains), :]
+        ret_sites = sites.loc[lambda df: df['point'].apply(shape.contains), :].copy()
     return ret_sites

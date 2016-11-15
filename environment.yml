@@ -4,6 +4,7 @@ dependencies:
  - jupyter
  - matplotlib
  - netCDF4
+ - nose
  - pandas
  - psycopg2
  - shapely
