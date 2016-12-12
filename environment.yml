@@ -1,5 +1,6 @@
 dependencies:
  - python=2
+ - flask
  - h5py
  - jupyter
  - matplotlib
