@@ -25,7 +25,7 @@ FORECAST_ATTRS = [ "day_ahead_power", "hour_ahead_power", "4_hour_ahead_power",
 MET_ATTRS = ['density', 'power', 'pressure', 'temperature', 'wind_direction',
                'wind_speed']
 WIND_MET_DIR = "/projects/hpc-apps/wtk/data/hdf"
-WIND_NC_DIR = "/projects/hpc-apps/wtk/data/met_data"
+WIND_MET_NC_DIR = "/projects/hpc-apps/wtk/data/met_data"
 
 H5_AVAILABLE_DATA_INTERVALS = [5, 60] #??? defined in two places with different values
 # name of the dataset containing time stamps
@@ -60,9 +60,9 @@ def get_wind_data_by_wkt(wkt, names, attributes=None, interval=5, leap_day=False
         dict of site_id to Pandas dataframe containing requested data
     '''
     if dataset == "met":
-        data_function = get_wind_data
+        data_dir = WIND_MET_NC_DIR
     elif dataset == "forecast":
-        data_function = get_forecast_data
+        data_dir = WIND_FCST_DIR
     else:
         raise Exception("Invalid data to retrieve: %s"%type)
     ret_dict = {}
@@ -79,11 +79,12 @@ def get_wind_data_by_wkt(wkt, names, attributes=None, interval=5, leap_day=False
             else:
                 min_dt = pandas.Timestamp('%s-01-01'%year, tz='utc')
                 max_dt = pandas.Timestamp('%s-12-31 23:59:59'%year, tz='utc')
-            ret_df = ret_df.append(data_function(site_id, min_dt, max_dt, attributes, leap_day, utc))
+            #ret_df = ret_df.append(data_function(site_id, min_dt, max_dt, attributes, leap_day, utc))
+            ret_df = ret_df.append(get_nc_data(site_id, min_dt, max_dt, attributes, leap_day, utc, data_dir))
         ret_dict[site_id] = ret_df
     return ret_dict
 
-def get_wind_data(site_id, start, end, attributes=None, leap_day=True, utc=False):
+def get_wind_data(site_id, start, end, attributes=None, leap_day=True, utc=False, source="hdf"):
     '''Retrieve wind data for a specific site for a range of times
 
     Required Args:
@@ -99,6 +100,7 @@ def get_wind_data(site_id, start, end, attributes=None, leap_day=True, utc=False
         leap_day - (boolean) Include leap day data or remove it.  Defaults to
                    True, include leap day data
         utc - (boolean) Keep as UTC or convert to local time.  Defaults to local
+        source - (String) Source of data to retrieve, either "nc" or "hdf".  Defaults to "hdf"
 
     Returns:
         Pandas dataframe containing requested data
@@ -112,27 +114,30 @@ def get_wind_data(site_id, start, end, attributes=None, leap_day=True, utc=False
     min_dt = start.tz_convert('utc')
     max_dt = end.tz_convert('utc')
     _logger.info("After conversion dates are %s to %s", min_dt, max_dt)
-    file_years = range(min_dt.year, max_dt.year+1)
-    # Must pull data for each year from start to end
-    for file_year in file_years:
-        if file_year < 2007 or file_year > 2012:
-            _logger.info("Skipping year that has no data: %s", file_year)
-            next
-        _logger.info("pulling in %s"%(file_year))
-        year_df = pandas.DataFrame()
-        with h5py.File(WIND_MET_DIR+"/wtk_%s.h5"%file_year, "r") as h5_file:
-            year_df['datetime'] = h5_file[H5_TIME_INDEX_NAME][:]
-            # Someone with better pandas skills will code this nicer
-            year_df.index = pandas.to_datetime(year_df.pop('datetime'))
-            year_df.index = year_df.index.tz_localize('utc')
-            if utc == False:
-                year_df.index = year_df.index.tz_convert(site_tz)
-            for attr in attributes:
-                scale = h5_file[attr].attrs['scale_factor']
-                year_df[attr] = h5_file[attr][:,int(site_id)] * scale
-            year_df = year_df.truncate(before=min_dt, after=max_dt)
-            _logger.info("year_df shape is %s", repr(year_df.shape))
-            ret_df = ret_df.append(year_df)
+    if source == "hdf":
+        file_years = range(min_dt.year, max_dt.year+1)
+        # Must pull data for each year from start to end
+        for file_year in file_years:
+            if file_year < 2007 or file_year > 2012:
+                _logger.info("Skipping year that has no data: %s", file_year)
+                next
+            _logger.info("pulling in %s"%(file_year))
+            year_df = pandas.DataFrame()
+            with h5py.File(WIND_MET_DIR+"/wtk_%s.h5"%file_year, "r") as h5_file:
+                year_df['datetime'] = h5_file[H5_TIME_INDEX_NAME][:]
+                # Someone with better pandas skills will code this nicer
+                year_df.index = pandas.to_datetime(year_df.pop('datetime'))
+                year_df.index = year_df.index.tz_localize('utc')
+                if utc == False:
+                    year_df.index = year_df.index.tz_convert(site_tz)
+                for attr in attributes:
+                    scale = h5_file[attr].attrs['scale_factor']
+                    year_df[attr] = h5_file[attr][:,int(site_id)] * scale
+                year_df = year_df.truncate(before=min_dt, after=max_dt)
+                _logger.info("year_df shape is %s", repr(year_df.shape))
+                ret_df = ret_df.append(year_df)
+    elif source == "nc":
+        ret_df = get_nc_data(site, start_time, end_time, attributes, leap_day, utc)
     if leap_day == False:
         ret_df = ret_df[~((ret_df.index.month == 2) & (ret_df.index.day == 29))]
     return ret_df
@@ -169,47 +174,14 @@ def save_wind_data(datadict, zipfilename):
                     # Add to zip archive with name site-year.csv
                     zfile.write(cur_file.name, fname)
 
-def get_nc_data(site, start_time, end_time, attributes=None, leap_day=False,
-                utc=False):
-    '''Return site data within the times from the netcdf files. This is left in
-    as a development tool, not for production.  Most nc files haven't been
-    copied over, and won't be unless a deficiency is found in the hdf.
-
-    Required Args:
-        site - (int) Site identifier
-        start_time - (int) Unix timestamp of start
-        end_time - (int) Unix timestamp of end
-
-    Optional Args:
-        attributes - (String or List of Strings) List of attributes to retrieve
-                      from the database.  Limited to MET_ATTRS.
-        leap_day - (NOT IMPLEMENTED) Include leap day in data
-        utc - (NOT IMPLEMENTED) (boolean) Keep as UTC or convert to local time.
-              Defaults to local
-
-    Returns:
-        Pandas dataframe containing requested data
-    '''
-    site_file = os.path.join(WIND_NC_DIR, str(site/500), "%s.nc"%site)
-    _logger.info("site file %s", site_file)
-    nc = netCDF4.Dataset(site_file)
-    first_dp = int((start_time - nc.start_time)/nc.sample_period)
-    last_dp = int((end_time - nc.start_time)/nc.sample_period) + 1
-    _logger.info("Reading %s:%s", first_dp, last_dp)
-    ret_df = pandas.DataFrame()
-    ret_df['timestamp'] = numpy.arange(start_time, end_time + 1, int(nc.sample_period))
-    for attr in attributes:
-        ret_df[attr] = nc[attr][first_dp:last_dp]
-    return ret_df
-
-def get_forecast_data(site_id, start, end, attributes=None, leap_day=True, utc=False):
-    '''Retrieve forecast data for a specific site for a range of times
+def get_nc_data(site_id, start, end, attributes=None, leap_day=True, utc=False, nc_dir=WIND_FCST_DIR):
+    '''Retrieve nc data for a specific site for a range of times from a directory
+       that matches forecast and met layouts.
 
     Required Args:
         site_id - (String) Wind site id
         start - (pandas.Timestamp) Timestamp for start of data
         end - (pandas.Timestamp) Timestamp for end of data
-        names - (List of Strings) List of year names
 
     Optional Args:
         attributes - (List of Strings) List of attributes to retrieve
@@ -218,27 +190,33 @@ def get_forecast_data(site_id, start, end, attributes=None, leap_day=True, utc=F
         leap_day - (boolean) Include leap day data or remove it.  Defaults to
                    True, include leap day data
         utc - (boolean) Keep as UTC or convert to local time.  Defaults to local
+        nc_dir - (String) Directory containing site nc files in specific layout,
+                 Defaults to WIND_FCST_DIR, WIND_MET_NC_DIR is where met data is
+                 stored in nc format.
 
     Returns:
         Pandas dataframe containing requested data
     '''
     if attributes is None:
-        attributes = FORECAST_ATTRS
+        if nc_dir == WIND_FCST_DIR:
+            attributes = FORECAST_ATTRS
+        elif nc_dir == WIND_MET_NC_DIR:
+            attributes = MET_ATTRS
     site = int(site_id)
     site_tz = timezones[site_id]['zoneName']
     _logger.info("Site %s is in %s", site_id, site_tz)
-    site_file = os.path.join(WIND_FCST_DIR, str(site/500), "%s.nc"%site)
+    site_file = os.path.join(nc_dir, str(site/500), "%s.nc"%site)
     _logger.info("Site file %s", site_file)
     nc = netCDF4.Dataset(site_file)
+    data_size = nc.dimensions['time'].size
+    _logger.info("Site data points %s", data_size)
     min_dt = start.tz_convert('utc')
     max_dt = end.tz_convert('utc')
     _logger.info("After conversion dates are %s to %s", min_dt, max_dt)
-
     start_time = min_dt.value // 10 ** 9
     end_time = max_dt.value // 10 ** 9
     first_dp = max(0, int((start_time - nc.start_time)/nc.sample_period))
-    # 61368 time data points in each .nc file
-    last_dp = min(61368, int((end_time - nc.start_time)/nc.sample_period) + 1)
+    last_dp = min(data_size, int((end_time - nc.start_time)/nc.sample_period) + 1)
     _logger.info("Reading %s:%s", first_dp, last_dp)
     ret_df = pandas.DataFrame()
     # TODO: Convert timestamp to tz sensitive datetime.

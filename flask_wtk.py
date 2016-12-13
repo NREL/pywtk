@@ -2,7 +2,7 @@
 from flask import Flask, json, request, jsonify
 import pandas
 import traceback
-from pywtk.wtk_api import get_wind_data, get_forecast_data
+from pywtk.wtk_api import get_wind_data, get_nc_data
 
 app = Flask(__name__)
 
@@ -50,7 +50,7 @@ def met_data():
 
 @app.route("/fcst")
 def fcst_data():
-    '''Return forecast data from the hdf files
+    '''Return forecast data from the nc files
     Kind of ugly that each of the sites data returns as a single string, but it's
     how pandas encodes the json data that makes it hard to use anything else to
     decode it.
@@ -69,7 +69,7 @@ def fcst_data():
     ret_dict = {}
     try:
         for site_id in sites:
-            ret_dict[site_id] = get_forecast_data(site_id, start, end).to_json()
+            ret_dict[site_id] = get_nc_data(site_id, start, end).to_json()
         return jsonify(ret_dict)
     except:
         traceback.print_exc()

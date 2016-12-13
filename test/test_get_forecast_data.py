@@ -6,7 +6,7 @@ import time
 from unittest import TestCase, skip
 from zipfile import ZipFile
 
-from pywtk.wtk_api import get_forecast_data, get_wind_data_by_wkt, FORECAST_ATTRS
+from pywtk.wtk_api import get_nc_data, get_wind_data_by_wkt, FORECAST_ATTRS, WIND_FCST_DIR
 
 class TestGetForecastData(TestCase):
     def test_multiple_years(self):
@@ -15,7 +15,7 @@ class TestGetForecastData(TestCase):
         # UTC
         start = pandas.Timestamp('2007-01-01', tz='utc')
         end = pandas.Timestamp('2008-08-02', tz='utc')
-        fcst_data = get_forecast_data("53252", start, end, utc=True)
+        fcst_data = get_nc_data("53252", start, end, utc=True, nc_dir=WIND_FCST_DIR)
         self.assertEqual(start, fcst_data.index[0])
         self.assertEqual(end, fcst_data.index[-1])
 
@@ -25,7 +25,7 @@ class TestGetForecastData(TestCase):
         # UTC
         start = pandas.Timestamp('2007-01-01', tz='utc')
         end = pandas.Timestamp('2007-01-02', tz='utc')
-        fcst_data = get_forecast_data("53252", start, end, utc=True)
+        fcst_data = get_nc_data("53252", start, end, utc=True, nc_dir=WIND_FCST_DIR)
         self.assertEqual(start, fcst_data.index[0])
         # From ncdump, all values are float32 which do not compare easily to
         # python floats which are float64
@@ -41,7 +41,7 @@ class TestGetForecastData(TestCase):
         # Local
         #start = pandas.Timestamp('2007-01-01', tz='America/Denver')
         #end = pandas.Timestamp('2007-01-02', tz='America/Denver')
-        fcst_data = get_forecast_data("53252", start, end, utc=False)
+        fcst_data = get_nc_data("53252", start, end, utc=False, nc_dir=WIND_FCST_DIR)
         self.assertEqual(start, fcst_data.index[0])
         # From ncdump, all values are float32 which do not compare easily to
         # python floats which are float64
