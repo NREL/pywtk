@@ -137,7 +137,7 @@ def get_wind_data(site_id, start, end, attributes=None, leap_day=True, utc=False
                 _logger.info("year_df shape is %s", repr(year_df.shape))
                 ret_df = ret_df.append(year_df)
     elif source == "nc":
-        ret_df = get_nc_data(site, start_time, end_time, attributes, leap_day, utc)
+        ret_df = get_nc_data(site_id, start, end, attributes, leap_day, utc, nc_dir=WIND_MET_NC_DIR)
     if leap_day == False:
         ret_df = ret_df[~((ret_df.index.month == 2) & (ret_df.index.day == 29))]
     return ret_df
