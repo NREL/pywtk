@@ -14,6 +14,26 @@ source activate pywtk
 python setup.py install
 ```
 
+## Example notebooks
+
+On peregrine run the start_notebook.sh in the notebooks/ directory.  When accessing the notebook
+for the first time, look for the token parameter in the URL that shows the server you have 
+access.  Otherwise you will be prompted for a password that won't work.
+
+  ```bash
+To view the notebook locally, run:
+ssh -L 8888:n0290:8888 hpc-login1.hpc.nrel.gov
+Then open your browser to http://localhost:8888/
+[I 09:47:27.987 NotebookApp] [nb_conda_kernels] enabled, 13 kernels found
+[I 09:47:35.463 NotebookApp] [nb_anacondacloud] enabled
+[I 09:47:35.506 NotebookApp] [nb_conda] enabled
+[I 09:47:36.242 NotebookApp] ✓ nbpresent HTML export ENABLED
+[W 09:47:36.242 NotebookApp] ✗ nbpresent PDF export DISABLED: No module named nbbrowserpdf.exporters.pdf
+[I 09:47:36.250 NotebookApp] Serving notebooks from local directory: /home/hsorense/projects/wind2plexos
+[I 09:47:36.250 NotebookApp] 0 active kernels 
+[I 09:47:36.250 NotebookApp] The Jupyter Notebook is running at: http://0.0.0.0:8888/?token=c7c42d73e5e7954688873ab27c79207977c335829385b30d
+```
+
 ## Available data and how to access it
 * Wind site metadata
 

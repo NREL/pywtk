@@ -136,10 +136,10 @@ def get_wind_data(site_id, start, end, attributes=None, leap_day=True, utc=False
                 year_df = year_df.truncate(before=min_dt, after=max_dt)
                 _logger.info("year_df shape is %s", repr(year_df.shape))
                 ret_df = ret_df.append(year_df)
+        if leap_day == False:
+            ret_df = ret_df[~((ret_df.index.month == 2) & (ret_df.index.day == 29))]
     elif source == "nc":
         ret_df = get_nc_data(site_id, start, end, attributes, leap_day, utc, nc_dir=WIND_MET_NC_DIR)
-    if leap_day == False:
-        ret_df = ret_df[~((ret_df.index.month == 2) & (ret_df.index.day == 29))]
     return ret_df
 
 def save_wind_data(datadict, zipfilename):
@@ -229,4 +229,9 @@ def get_nc_data(site_id, start, end, attributes=None, leap_day=True, utc=False, 
         ret_df.index = ret_df.index.tz_convert(site_tz)
     for attr in attributes:
         ret_df[attr] = nc[attr][first_dp:last_dp]
+    if leap_day == False:
+        ret_df = ret_df[~((ret_df.index.month == 2) & (ret_df.index.day == 29))]
     return ret_df
+
+# Backwards compatability
+get_forecast_data = get_nc_data
