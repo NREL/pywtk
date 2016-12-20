@@ -23,7 +23,7 @@ class TestWebsiteEquiv(TestCase):
         &site_url=wind-toolkit%2Fwind%2Fwtk_download.json&full_name=Harry+Sorensen&email=harry.sorensen%40nrel.gov&affiliation=NREL&mailing_list=false&reason=Development+testing
         '''
         wind_dict = get_wind_data_by_wkt(wkt, names, attributes=attributes, leap_day=leap_day, utc=utc)
-        wind_data = wind_dict["53252"]
+        wind_data = wind_dict[53252]
         #Year,Month,Day,Hour,Minute,density at hub height (kg/m^3),power (MW),surface air pressure (Pa),air temperature at 2m (K),wind direction at 100m (deg),wind speed at 100m (m/s)
         #first_line = [2011,1,1,0,0,1.1320000000000001,15.359,85467.688,259.591,318.124,11.844]
         # Match to the higher accuracy of the nc dataset
@@ -36,7 +36,7 @@ class TestWebsiteEquiv(TestCase):
         self.assertEqual(365*24*12, len(wind_data))
         utc = True
         wind_dict = get_wind_data_by_wkt(wkt, ["2011"], attributes=attributes, leap_day=leap_day, utc=utc)
-        wind_data = wind_dict["53252"]
+        wind_data = wind_dict[53252]
         #first_line = [2011,1,1,0,0,1.1420000000000001,15.991,85195.768,257.153,322.557,14.126]
         expected = [15.991483688354492, 322.55743408203125, 14.126996040344238, 257.1535339355469, 85195.765625, 1.1426444053649902]
         #expected_dict = dict(zip(["density", "power", "pressure", "temperature", "wind_direction", "wind_speed"], first_line[5:]))

@@ -1,5 +1,5 @@
 '''Loads site metadata and timezone from files and provides searches for nearest
-site to a point and a list of sites within a sshape'''
+site to a point and a list of sites within a shape'''
 import csv
 import logging
 import os

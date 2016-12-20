@@ -54,13 +54,14 @@ class TestGetForecastData(TestCase):
         # Verify column names are correct
         for k, v in ex_dict.items():
             self.assertEqual(v, fcst_data.ix[0][k])
+
     def test_get_forecast_from_wkt(self):
         '''Test retrieval of data based on wkt
         '''
         wkt = 'POINT(-103.0432 40.4506)'
         fcst_dict = get_wind_data_by_wkt(wkt, ["2007"], utc=True, dataset="forecast")
-        self.assertIn("53252", fcst_dict)
-        fcst_data = fcst_dict["53252"]
+        self.assertIn(53252, fcst_dict)
+        fcst_data = fcst_dict[53252]
         start = pandas.Timestamp('2007-01-01', tz='UTC')
         self.assertEqual(start, fcst_data.index[0])
         # From ncdump, all values are float32 which do not compare easily to

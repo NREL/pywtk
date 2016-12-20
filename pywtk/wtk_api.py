@@ -9,7 +9,7 @@ import psycopg2
 from tempfile import NamedTemporaryFile
 from zipfile import ZipFile
 
-from site_lookup import get_3tiersites_from_wkt, timezones, sites
+from site_lookup_pandas import get_3tiersites_from_wkt, timezones, sites
 
 _logger = logging.getLogger(__name__)
 WIND_FCST_DIR = "/projects/hpc-apps/wtk/data/fcst_data"
@@ -66,8 +66,8 @@ def get_wind_data_by_wkt(wkt, names, attributes=None, interval=5, leap_day=False
     else:
         raise Exception("Invalid data to retrieve: %s"%type)
     ret_dict = {}
-    for site_id in get_3tiersites_from_wkt(wkt):
-        site_tz = timezones[site_id]['zoneName']
+    for site_id in get_3tiersites_from_wkt(wkt).index.values:
+        site_tz = timezones.ix[site_id]['zoneName']
         _logger.info("Site %s is in %s", site_id, site_tz)
         ret_df = pandas.DataFrame()
         for year in names:
@@ -82,13 +82,17 @@ def get_wind_data_by_wkt(wkt, names, attributes=None, interval=5, leap_day=False
             #ret_df = ret_df.append(data_function(site_id, min_dt, max_dt, attributes, leap_day, utc))
             ret_df = ret_df.append(get_nc_data(site_id, min_dt, max_dt, attributes, leap_day, utc, data_dir))
         ret_dict[site_id] = ret_df
+        # Break on POINT as it will return all sites in order of distance to the
+        # wkt point
+        if 'POINT' in wkt:
+            break
     return ret_dict
 
 def get_wind_data(site_id, start, end, attributes=None, leap_day=True, utc=False, source="hdf"):
     '''Retrieve wind data for a specific site for a range of times
 
     Required Args:
-        site_id - (String) Wind site id
+        site_id - (String or int) Wind site id
         start - (pandas.Timestamp) Timestamp for start of data
         end - (pandas.Timestamp) Timestamp for end of data
         names - (List of Strings) List of year names
@@ -105,9 +109,10 @@ def get_wind_data(site_id, start, end, attributes=None, leap_day=True, utc=False
     Returns:
         Pandas dataframe containing requested data
     '''
+    site_id = int(site_id)
     if attributes is None:
         attributes = MET_ATTRS
-    site_tz = timezones[site_id]['zoneName']
+    site_tz = timezones.ix[site_id]['zoneName']
     _logger.info("Site %s is in %s", site_id, site_tz)
     ret_df = pandas.DataFrame()
     _logger.info("utc is %s", utc)
@@ -179,7 +184,7 @@ def get_nc_data(site_id, start, end, attributes=None, leap_day=True, utc=False, 
        that matches forecast and met layouts.
 
     Required Args:
-        site_id - (String) Wind site id
+        site_id - (String or int) Wind site id
         start - (pandas.Timestamp) Timestamp for start of data
         end - (pandas.Timestamp) Timestamp for end of data
 
@@ -203,7 +208,7 @@ def get_nc_data(site_id, start, end, attributes=None, leap_day=True, utc=False, 
         elif nc_dir == WIND_MET_NC_DIR:
             attributes = MET_ATTRS
     site = int(site_id)
-    site_tz = timezones[site_id]['zoneName']
+    site_tz = timezones.ix[site]['zoneName']
     _logger.info("Site %s is in %s", site_id, site_tz)
     site_file = os.path.join(nc_dir, str(site/500), "%s.nc"%site)
     _logger.info("Site file %s", site_file)
