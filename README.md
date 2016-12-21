@@ -154,13 +154,14 @@ print(wind_data[31563].info())
   ```text
 [30539, 31320, 30873, 30874, 29733, 29872, 33203, 31032, 31033, 31034, 32060, 29375, 32834, 30019, 31563, 31189, 31190, 31191, 31192, 31321, 31322, 31323, 31324, 30190, 30712, 30713]
 <class 'pandas.core.frame.DataFrame'>
-DatetimeIndex: 8760 entries, 2008-01-01 00:00:00+00:00 to 2008-12-31 23:00:00+00:00
+DatetimeIndex: 8784 entries, 2008-01-01 00:00:00+00:00 to 2008-12-31 23:00:00+00:00
 Data columns (total 2 columns):
-hour_ahead_power    8760 non-null float32
-day_ahead_power     8760 non-null float32
+hour_ahead_power    8784 non-null float32
+day_ahead_power     8784 non-null float32
 dtypes: float32(2)
-memory usage: 136.9 KB
+memory usage: 137.2 KB
 None
+
 ```
 * Retrieval of forecast data for a single site for specified attributes and timespan
 
@@ -170,7 +171,7 @@ import pywtk.wtk_api
 start = pandas.Timestamp('2007-08-01', tz='utc')
 end = pandas.Timestamp('2007-08-15', tz='utc')
 attributes = ['hour_ahead_power', 'day_ahead_power']
-wind_data = pywtk.wtk_api.get_forecast_data("102445", start, end, attributes=attributes)
+wind_data = pywtk.wtk_api.get_forecast_data(102445, start, end, attributes=attributes)
 print(wind_data.info())
 ```
   ```text
