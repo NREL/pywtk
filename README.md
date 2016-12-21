@@ -38,36 +38,36 @@ Then open your browser to http://localhost:8888/
 * Wind site metadata
 
   ```bash
-$ python -c "import pywtk.site_lookup, pprint; pprint.pprint(pywtk.site_lookup.sites['11222'])"
-{'capacity': '16.0',
- 'capacity_factor': '0.411',
- 'city': '',
- 'country': 'United States',
- 'elevation': '',
- 'fraction_of_usable_area': '1.0',
- 'gid': '11223',
- 'point': <shapely.geometry.point.Point object at 0x107dfc910>,
- 'power_curve': '3',
- 'site_id': '11222',
- 'state': 'Texas',
- 'the_geom': '0101000020E61000009414580053BA59C069FD2D01F8574040',
- 'wind_speed': '7.34'}
+$ python -c "import pywtk.site_lookup; print(pywtk.site_lookup.sites.ix[11222])"
+gid                                                                    11223
+fraction_of_usable_area                                                    1
+power_curve                                                                3
+capacity                                                                  16
+wind_speed                                                              7.34
+capacity_factor                                                        0.411
+the_geom                   0101000020E61000009414580053BA59C069FD2D01F857...
+city                                                                     NaN
+state                                                                  Texas
+country                                                        United States
+elevation                                                                NaN
+point                                          POINT (-102.911316 32.687256)
+Name: 11222, dtype: object
 ```
 * Wind site timezones
 
   ```bash
-$ python -c "import pywtk.site_lookup, pprint; pprint.pprint(pywtk.site_lookup.timezones['11222'])"
-{'abbreviation': 'CDT',
- 'countryCode': 'US',
- 'countryName': 'United States',
- 'dst': '1',
- 'dstEnd': '1478415600',
- 'dstStart': '1457856000',
- 'gmtOffset': '-18000',
- 'nextAbbreviation': 'CST',
- 'site_id': '11222',
- 'timestamp': '1470316655',
- 'zoneName': 'America/Chicago'}
+$ python -c "import pywtk.site_lookup; print(pywtk.site_lookup.timezones.ix[11222])"
+abbreviation                    CDT
+countryCode                      US
+nextAbbreviation                CST
+timestamp                1470316655
+dst                               1
+dstStart                 1457856000
+countryName           United States
+gmtOffset                    -18000
+dstEnd                   1478415600
+zoneName            America/Chicago
+Name: 11222, dtype: object
 ```
 * Available met data attributes
 
@@ -84,14 +84,16 @@ $ python -c "import pywtk.wtk_api; print pywtk.wtk_api.FORECAST_ATTRS"
 * Lookup sites within a Well Known Text rectangle descriptor
 
   ```bash
-$ python -c "import pywtk.site_lookup; print pywtk.site_lookup.get_3tiersites_from_wkt('POLYGON((-120.82 34.4,-119.19 34.4,-119.19 33.92,-120.82 33.92,-120.82 34.4))')"
-['29375', '31034', '31032', '31033', '30019', '30190', '33203', '32060', '31189', '31192', '31191', '31190', '29733', '30539', '32834', '31324', '31320', '31322', '31323', '31563', '30712', '30713', '31321', '30874', '30873', '29872']
+$ python -c "import pywtk.site_lookup; in_sites = pywtk.site_lookup.get_3tiersites_from_wkt('POLYGON((-120.82 34.4,-119.19 34.4,-119.19 33.92,-120.82 33.92,-120.82 34.4))'); print in_sites.index.values"
+[29375 29733 29872 30019 30190 30539 30712 30713 30874 31032 31033 31189
+ 31192 31320 31321 31322 31323 31324 31563 32060 32834 33203 30873 31034
+ 31190 31191]
 ```
-* Lookup site nearest a Well Known Text point
+* Lookup the three nearest sites to a Well Known Text point
 
   ```bash
-$ python -c "import pywtk.site_lookup; print pywtk.site_lookup.get_3tiersites_from_wkt('POINT(-103.12 40.24)')"
-['53252']
+python -c "import pywtk.site_lookup; sorted_sites = pywtk.site_lookup.get_3tiersites_from_wkt('POINT(-103.12 40.24)'); print sorted_sites.index.values[:3]"
+[53252 52873 54322]
 ```
 * Retrieval of met data for multiple sites for a Well Known Text descriptor for specified attributes and year
 
@@ -124,7 +126,7 @@ import pywtk.wtk_api
 start = pandas.Timestamp('2007-08-01', tz='utc')
 end = pandas.Timestamp('2007-08-15', tz='utc')
 attributes = ['power', 'wind_speed']
-wind_data = pywtk.wtk_api.get_wind_data("102445", start, end, attributes=attributes)
+wind_data = pywtk.wtk_api.get_wind_data(102445, start, end, attributes=attributes)
 print(wind_data.info())
 ```
   ```text
@@ -147,17 +149,17 @@ years = ['2008']
 attributes = ['hour_ahead_power', 'day_ahead_power']
 wind_data = pywtk.wtk_api.get_wind_data_by_wkt(wkt, years, attributes=attributes, dataset="forecast", utc=True)
 print(wind_data.keys())
-print(wind_data['31563'].info())
+print(wind_data[31563].info())
 ```
   ```text
-['31563', '31324', '30713', '33203', '30874', '31320', '31321', '31322', '31323', '31192', '31191', '31190', '29375', '30712', '32834', '30190', '30019', '31033', '29872', '31189', '30873', '32060', '29733', '31034', '31032', '30539']
+[30539, 31320, 30873, 30874, 29733, 29872, 33203, 31032, 31033, 31034, 32060, 29375, 32834, 30019, 31563, 31189, 31190, 31191, 31192, 31321, 31322, 31323, 31324, 30190, 30712, 30713]
 <class 'pandas.core.frame.DataFrame'>
-DatetimeIndex: 8784 entries, 2008-01-01 00:00:00+00:00 to 2008-12-31 23:00:00+00:00
+DatetimeIndex: 8760 entries, 2008-01-01 00:00:00+00:00 to 2008-12-31 23:00:00+00:00
 Data columns (total 2 columns):
-hour_ahead_power    8784 non-null float32
-day_ahead_power     8784 non-null float32
+hour_ahead_power    8760 non-null float32
+day_ahead_power     8760 non-null float32
 dtypes: float32(2)
-memory usage: 137.2 KB
+memory usage: 136.9 KB
 None
 ```
 * Retrieval of forecast data for a single site for specified attributes and timespan
