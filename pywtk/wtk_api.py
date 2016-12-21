@@ -35,7 +35,7 @@ H5_DATA_INTERVAL = 60
 # array of all intervals chosen for exposure to the client for this H5 data (must be increments of H5_DATA_INTERVAL)
 H5_AVAILABLE_DATA_INTERVALS = [60]
 
-def get_wind_data_by_wkt(wkt, names, attributes=None, interval=5, leap_day=False,
+def get_wind_data_by_wkt(wkt, names, attributes=None, interval=5, leap_day=True,
                   utc=False, dataset="met"):
     '''Duplicate functionality of URL data grabber at
     https://mapsbeta.nrel.gov/api/developer_proxy
