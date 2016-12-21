@@ -84,8 +84,10 @@ $ python -c "import pywtk.wtk_api; print pywtk.wtk_api.FORECAST_ATTRS"
 * Lookup sites within a Well Known Text rectangle descriptor
 
   ```bash
-$ python -c "import pywtk.site_lookup; print pywtk.site_lookup.get_3tiersites_from_wkt('POLYGON((-120.82 34.4,-119.19 34.4,-119.19 33.92,-120.82 33.92,-120.82 34.4))')"
-['29375', '31034', '31032', '31033', '30019', '30190', '33203', '32060', '31189', '31192', '31191', '31190', '29733', '30539', '32834', '31324', '31320', '31322', '31323', '31563', '30712', '30713', '31321', '30874', '30873', '29872']
+$ python -c "import pywtk.site_lookup; in_sites = pywtk.site_lookup.get_3tiersites_from_wkt('POLYGON((-120.82 34.4,-119.19 34.4,-119.19 33.92,-120.82 33.92,-120.82 34.4))'); print in_sites.index.values"
+[29375 29733 29872 30019 30190 30539 30712 30713 30874 31032 31033 31189
+ 31192 31320 31321 31322 31323 31324 31563 32060 32834 33203 30873 31034
+ 31190 31191]
 ```
 * Lookup site nearest a Well Known Text point
 
