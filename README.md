@@ -38,20 +38,20 @@ Then open your browser to http://localhost:8888/
 * Wind site metadata
 
   ```bash
-$ python -c "import pywtk.site_lookup, pprint; pprint.pprint(pywtk.site_lookup.sites['11222'])"
-{'capacity': '16.0',
- 'capacity_factor': '0.411',
- 'city': '',
- 'country': 'United States',
- 'elevation': '',
- 'fraction_of_usable_area': '1.0',
- 'gid': '11223',
- 'point': <shapely.geometry.point.Point object at 0x107dfc910>,
- 'power_curve': '3',
- 'site_id': '11222',
- 'state': 'Texas',
- 'the_geom': '0101000020E61000009414580053BA59C069FD2D01F8574040',
- 'wind_speed': '7.34'}
+$ python -c "import pywtk.site_lookup; print(pywtk.site_lookup.sites.ix[11222])"
+gid                                                                    11223
+fraction_of_usable_area                                                    1
+power_curve                                                                3
+capacity                                                                  16
+wind_speed                                                              7.34
+capacity_factor                                                        0.411
+the_geom                   0101000020E61000009414580053BA59C069FD2D01F857...
+city                                                                     NaN
+state                                                                  Texas
+country                                                        United States
+elevation                                                                NaN
+point                                          POINT (-102.911316 32.687256)
+Name: 11222, dtype: object
 ```
 * Wind site timezones
 
