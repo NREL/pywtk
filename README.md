@@ -89,11 +89,11 @@ $ python -c "import pywtk.site_lookup; in_sites = pywtk.site_lookup.get_3tiersit
  31192 31320 31321 31322 31323 31324 31563 32060 32834 33203 30873 31034
  31190 31191]
 ```
-* Lookup site nearest a Well Known Text point
+* Lookup the three nearest sites to a Well Known Text point
 
   ```bash
-$ python -c "import pywtk.site_lookup; print pywtk.site_lookup.get_3tiersites_from_wkt('POINT(-103.12 40.24)')"
-['53252']
+python -c "import pywtk.site_lookup; sorted_sites = pywtk.site_lookup.get_3tiersites_from_wkt('POINT(-103.12 40.24)'); print sorted_sites.index.values[:3]"
+[53252 52873 54322]
 ```
 * Retrieval of met data for multiple sites for a Well Known Text descriptor for specified attributes and year
 
