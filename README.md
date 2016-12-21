@@ -103,17 +103,17 @@ years = ['2008']
 attributes = ['power', 'wind_speed']
 wind_data = pywtk.wtk_api.get_wind_data_by_wkt(wkt, years, attributes=attributes)
 print(wind_data.keys())
-print(wind_data['31563'].info())
+print(wind_data[31563].info())
 ```
   ```text
-['31563', '31324', '30713', '33203', '30874', '31320', '31321', '31322', '31323', '31192', '31191', '31190', '29375', '30712', '32834', '30190', '30019', '31033', '29872', '31189', '30873', '32060', '29733', '31034', '31032', '30539']
+[30539, 31320, 30873, 30874, 29733, 29872, 33203, 31032, 31033, 31034, 32060, 29375, 32834, 30019, 31563, 31189, 31190, 31191, 31192, 31321, 31322, 31323, 31324, 30190, 30712, 30713]
 <class 'pandas.core.frame.DataFrame'>
 DatetimeIndex: 105120 entries, 2008-01-01 00:00:00-08:00 to 2008-12-31 23:55:00-08:00
 Data columns (total 2 columns):
 power         105120 non-null float64
 wind_speed    105120 non-null float64
 dtypes: float64(2)
-memory usage: 2.4 MB
+memory usage: 1.6 MB
 None
 ```
 * Retrieval of met data for a single site for specified attributes and timespan
