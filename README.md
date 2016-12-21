@@ -56,18 +56,18 @@ Name: 11222, dtype: object
 * Wind site timezones
 
   ```bash
-$ python -c "import pywtk.site_lookup, pprint; pprint.pprint(pywtk.site_lookup.timezones['11222'])"
-{'abbreviation': 'CDT',
- 'countryCode': 'US',
- 'countryName': 'United States',
- 'dst': '1',
- 'dstEnd': '1478415600',
- 'dstStart': '1457856000',
- 'gmtOffset': '-18000',
- 'nextAbbreviation': 'CST',
- 'site_id': '11222',
- 'timestamp': '1470316655',
- 'zoneName': 'America/Chicago'}
+$ python -c "import pywtk.site_lookup; print(pywtk.site_lookup.timezones.ix[11222])"
+abbreviation                    CDT
+countryCode                      US
+nextAbbreviation                CST
+timestamp                1470316655
+dst                               1
+dstStart                 1457856000
+countryName           United States
+gmtOffset                    -18000
+dstEnd                   1478415600
+zoneName            America/Chicago
+Name: 11222, dtype: object
 ```
 * Available met data attributes
 
