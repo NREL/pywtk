@@ -161,8 +161,8 @@ day_ahead_power     8784 non-null float32
 dtypes: float32(2)
 memory usage: 137.2 KB
 None
-
 ```
+
 * Retrieval of forecast data for a single site for specified attributes and timespan
 
   ```python
@@ -184,6 +184,7 @@ dtypes: float32(2)
 memory usage: 5.3 KB
 None
 ```
+
 ## Well Known Text descriptors
 The WKT descriptor should follow the [SQL spec](http://www.opengeospatial.org/standards/sfs).  The following are examples
 of a polygon and point definitions:
