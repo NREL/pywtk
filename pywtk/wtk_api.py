@@ -208,11 +208,46 @@ def get_nc_data(site_id, start, end, attributes=None, leap_day=True, utc=False, 
         elif nc_dir == WIND_MET_NC_DIR:
             attributes = MET_ATTRS
     site = int(site_id)
-    site_tz = timezones.ix[site]['zoneName']
-    _logger.info("Site %s is in %s", site_id, site_tz)
     site_file = os.path.join(nc_dir, str(site/500), "%s.nc"%site)
     _logger.info("Site file %s", site_file)
-    nc = netCDF4.Dataset(site_file)
+    return get_nc_data_from_file(site_file, start, end, attributes=attributes, leap_day=leap_day, utc=utc)
+
+def get_nc_data_from_file(filename, start, end, attributes=None, leap_day=True, utc=False):
+    '''Retrieve nc data from a file for a range of times that matches forecast
+        and met layouts.
+
+    Required Args:
+        filename - (String) Location of nc file
+        start - (pandas.Timestamp) Timestamp for start of data
+        end - (pandas.Timestamp) Timestamp for end of data
+
+    Optional Args:
+        attributes - (List of Strings) List of attributes to retrieve
+                      from the database.  Limited to FORECAST_ATTRS.  Defaults to
+                      all available.
+        leap_day - (boolean) Include leap day data or remove it.  Defaults to
+                   True, include leap day data
+        utc - (boolean) Keep as UTC or convert to local time.  Defaults to local
+        nc_dir - (String) Directory containing site nc files in specific layout,
+                 Defaults to WIND_FCST_DIR, WIND_MET_NC_DIR is where met data is
+                 stored in nc format.
+
+    Returns:
+        Pandas dataframe containing requested data
+    '''
+    # Get timezone from filename.  Assume site_id.nc as the site_id is not part
+    # of the dataset
+    site_tz = None
+    filedir, filebase = os.path.split(filename)
+    try:
+        site_id = filebase[:-3]
+        site = int(site_id)
+        site_tz = timezones.ix[site]['zoneName']
+        _logger.info("Site %s is in %s", site_id, site_tz)
+    except:
+        _logger.warning("Unable to determine site id from filename, should be format of site_id.nc")
+
+    nc = netCDF4.Dataset(filename)
     data_size = nc.dimensions['time'].size
     _logger.info("Site data points %s", data_size)
     min_dt = start.tz_convert('utc')
@@ -231,6 +266,8 @@ def get_nc_data(site_id, start, end, attributes=None, leap_day=True, utc=False, 
     ret_df.index = pandas.to_datetime(ret_df.pop('datetime'))
     ret_df.index = ret_df.index.tz_localize('utc')
     if utc == False:
+        if site_tz is None:
+            raise Exception("Use utc=True for sites without defined timezones")
         ret_df.index = ret_df.index.tz_convert(site_tz)
     for attr in attributes:
         ret_df[attr] = nc[attr][first_dp:last_dp]
