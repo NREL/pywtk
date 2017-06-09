@@ -11,17 +11,22 @@ on a Linux64 system, ideally an AWS VM.
     * Setting up an AWS VM:
         * Launch micro instance with AMI linux 64-bit and log in.
 
+            ```bash
         ssh -i keyfile.pem ec2-user@ec2-54-183-146-226.us-west-1.compute.amazonaws.com
         sudo yum upgrade
         sudo yum install git
+        sudo yum groupinstall "Development Tools"
+        sudo yum install geos-devel
         git clone https://github.com/NREL/pywtk.git
-
-
+        git checkout lambda
+```
+    * Prepare virtualenv for pywtk
 
     ```bash
 virtualenv pywtk_virtenv
+pip install --upgrade pip
 pip install -r requirements.txt
-python setup.py install
+python setup_aws.py install
 ```
 
 2. Setup AWS access
