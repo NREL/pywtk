@@ -43,7 +43,7 @@ python setup_aws.py install
 
     ```bash
 (cd pywtk_virtenv/lib/python2.7/site-packages; zip -r ../../../../pywtk_aws.zip *)
-aws cp pywtk_aws.zip s3://pywtk-code/
+aws s3 cp pywtk_aws.zip s3://pywtk-code/
 ```
 
 5. Create lambda function
@@ -51,15 +51,24 @@ aws cp pywtk_aws.zip s3://pywtk-code/
     ```bash
 aws lambda create-function \
     --region us-west-2 \
-    --function-name TBD \
+    --function-name pywtk-api \
     --code S3Bucket=pywtk-code,S3Key=pywtk_aws.zip \
     --role arn:aws:iam::812847476558:role/pywtk-lambda \
-    --handler pywtk.wtk_api.wind_data_handler \
+    --handler pywtk.aws_lambda.handler \
     --runtime python2.7 \
     --timeout 10 \
-    --environment Variables={DATA_BUCKET=pywtk-data}
+    --environment Variables={DATA_BUCKET=pywtk-data} \
     --memory-size 1024
 ```
+
+6. Wire lambda into API Gateway and test
+
+    ```json
+    {"type": "site",
+ "sites": ["1001"]
+}
+```
+
 ## Example notebooks
 
 On peregrine run the start_notebook.sh in the notebooks/ directory.  When accessing the notebook

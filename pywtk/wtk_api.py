@@ -8,7 +8,7 @@ import pandas
 from tempfile import NamedTemporaryFile
 from zipfile import ZipFile
 
-from site_lookup import get_3tiersites_from_wkt, timezones, sites
+from .site_lookup import get_3tiersites_from_wkt, timezones, sites
 
 _logger = logging.getLogger(__name__)
 WIND_FCST_DIR = "/projects/hpc-apps/wtk/data/fcst_data"
