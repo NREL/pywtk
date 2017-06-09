@@ -1,4 +1,4 @@
-from .site_lookup import get_3tiersites_from_wkt, timezones, sites
+from pywtk.site_lookup import get_3tiersites_from_wkt, timezones, sites
 
 MAX_RETURN_SIZE = 10 # Restrict to 10 MB
 

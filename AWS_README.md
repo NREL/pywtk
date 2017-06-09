@@ -61,6 +61,15 @@ aws lambda create-function \
     --memory-size 1024
 ```
 
+    * Update code
+
+        ```bash
+aws lambda update-function-code \
+    --function-name pywtk-api \
+    --s3-bucket pywtk-code \
+    --s3-key pywtk_aws.zip
+```
+
 6. Wire lambda into API Gateway and test
 
     ```json
