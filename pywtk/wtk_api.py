@@ -5,7 +5,6 @@ import netCDF4
 import os
 import numpy
 import pandas
-import psycopg2
 from tempfile import NamedTemporaryFile
 from zipfile import ZipFile
 

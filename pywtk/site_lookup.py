@@ -4,8 +4,6 @@ import csv
 import logging
 import os
 import pandas
-import psycopg2
-import psycopg2.extras
 from shapely import wkb, wkt
 from shapely.geometry import Point
 import time
@@ -18,13 +16,21 @@ _dir = os.path.dirname(__file__)
 # Loading the module will read in the file and create the Points as they
 # will not change
 tstart = time.time()
-sites = pandas.read_csv(os.path.join(_dir, 'three_tier_site_metadata.csv'), index_col=1)
+if 'DATA_BUCKET' in os.environ:
+    # On a AWS lambda instance
+    import boto
+    sites = pandas.read_csv('s3://%s/three_tier_site_metadata.csv'%os.environ['DATA_BUCKET'], index_col=1)
+    _logger.info("Loaded %s sites in %s seconds", len(sites), time.time()-tstart)
+    tstart = time.time()
+    timezones = pandas.read_csv('s3://%s/site_timezone.csv'%os.environ['DATA_BUCKET'], index_col=0)
+    _logger.info("Loaded %s timezones in %s seconds", len(timezones), time.time()-tstart)
+else:
+    sites = pandas.read_csv(os.path.join(_dir, 'three_tier_site_metadata.csv'), index_col=1)
+    _logger.info("Loaded %s sites in %s seconds", len(sites), time.time()-tstart)
+    tstart = time.time()
+    timezones = pandas.read_csv(os.path.join(_dir, 'site_timezone.csv'), index_col=0)
+    _logger.info("Loaded %s timezones in %s seconds", len(timezones), time.time()-tstart)
 sites['point'] = sites['the_geom'].apply(wkb.loads, hex=True)
-_logger.info("Loaded %s sites in %s seconds", len(sites), time.time()-tstart)
-tstart = time.time()
-timezones = pandas.read_csv(os.path.join(_dir, 'site_timezone.csv'), index_col=0)
-_logger.info("Loaded %s timezones in %s seconds", len(timezones), time.time()-tstart)
-
 
 def get_3tiersites_from_wkt(wkt_str):
     '''Retrieve 3tier windsites from wkt
