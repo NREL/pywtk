@@ -28,20 +28,18 @@ def sites_request():
     Returns:
         json string representation of sites
     '''
-    #sites = request.args.getlist('site_id')
     orient = request.args.get("orient", "records")
     if orient not in ["split", "records", "index", "columns", "values"]:
         return jsonify({"success": False, "message": "Orient must be one of split, records, index, columns or values"}), 400
-    if request.args.has_key("wkt") and not request.args.has_key("site_id"):
+    if "wkt" in request.args and "site_id" not in request.args:
         wkt = request.args["wkt"]
         if 'POINT' in wkt:
             max_point_return = int(request.args.get("max_point_return", 1))
             wkt_indexes = get_3tiersites_from_wkt(wkt).index[:max_point_return]
         else:
             wkt_indexes = get_3tiersites_from_wkt(wkt).index
-        # The return DF is already a copy, no need to recopy
         return sites.loc[wkt_indexes].reset_index().drop('point', axis=1).to_json(orient=orient)
-    elif request.args.has_key("site_id") and not request.args.has_key("wkt"):
+    elif "wkt" not in request.args and "site_id" in request.args:
         site_list = [int(x) for x in request.args.getlist('site_id')]
         return sites.loc[site_list].copy().reset_index().drop('point', axis=1).to_json(orient=orient)
     else:

@@ -18,7 +18,6 @@ _dir = os.path.dirname(__file__)
 tstart = time.time()
 if 'DATA_BUCKET' in os.environ:
     # On a AWS lambda instance
-    import boto
     sites = pandas.read_csv('s3://%s/three_tier_site_metadata.csv'%os.environ['DATA_BUCKET'], index_col=1)
     _logger.info("Loaded %s sites in %s seconds", len(sites), time.time()-tstart)
     tstart = time.time()
