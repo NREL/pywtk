@@ -31,6 +31,8 @@ else:
     timezones = pandas.read_csv(os.path.join(_dir, 'site_timezone.csv'), index_col=0)
     _logger.info("Loaded %s timezones in %s seconds", len(timezones), time.time()-tstart)
 sites['point'] = sites['the_geom'].apply(wkb.loads, hex=True)
+sites['lat'] = sites['point'].apply(getattr, args=('y'))
+sites['lon'] = sites['point'].apply(getattr, args=('x'))
 
 def get_3tiersites_from_wkt(wkt_str):
     '''Retrieve 3tier windsites from wkt
@@ -39,8 +41,9 @@ def get_3tiersites_from_wkt(wkt_str):
     '''
     shape = wkt.loads(wkt_str)
     if 'POINT' in wkt_str:
-        sites['distance'] = sites['point'].apply(shape.distance)
-        ret_sites = sites.sort_values('distance', ascending=True)
+        copy_sites = sites.copy()
+        copy_sites['distance'] = copy_sites['point'].apply(shape.distance)
+        ret_sites = copy_sites.sort_values('distance', ascending=True)
     else:
         ret_sites = sites.loc[lambda df: df['point'].apply(shape.contains), :].copy()
     return ret_sites

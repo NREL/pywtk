@@ -1,10 +1,51 @@
 # Flask setup
 from flask import Flask, json, request, jsonify
 import pandas
-import traceback
+from pywtk.site_lookup import get_3tiersites_from_wkt, timezones, sites
 from pywtk.wtk_api import get_wind_data, get_nc_data
 
 app = Flask(__name__)
+
+@app.route("/")
+def heartbeat():
+    return ""
+
+@app.route("/sites")
+def sites_request():
+    '''Return sites from a list of site_ids or within a WKT definition.
+
+    Required parameters one of:
+        site_id - list of site_ids
+        wkt - Well known text
+
+    Optional parameters:
+        orient - Pandas dataframe to_json orientation, defaults to records:
+            split, records, index, columns or values
+            See Pandas documentation for more info
+        max_point_return - Maximum number of closest sites to a POINT wkt, defaults
+            to 1.  Will be ignored for all other cases.
+
+    Returns:
+        json string representation of sites
+    '''
+    #sites = request.args.getlist('site_id')
+    orient = request.args.get("orient", "records")
+    if orient not in ["split", "records", "index", "columns", "values"]:
+        return jsonify({"success": False, "message": "Orient must be one of split, records, index, columns or values"}), 400
+    if request.args.has_key("wkt") and not request.args.has_key("site_id"):
+        wkt = request.args["wkt"]
+        if 'POINT' in wkt:
+            max_point_return = int(request.args.get("max_point_return", 1))
+            wkt_indexes = get_3tiersites_from_wkt(wkt).index[:max_point_return]
+        else:
+            wkt_indexes = get_3tiersites_from_wkt(wkt).index
+        # The return DF is already a copy, no need to recopy
+        return sites.loc[wkt_indexes].reset_index().drop('point', axis=1).to_json(orient=orient)
+    elif request.args.has_key("site_id") and not request.args.has_key("wkt"):
+        site_list = [int(x) for x in request.args.getlist('site_id')]
+        return sites.loc[site_list].copy().reset_index().drop('point', axis=1).to_json(orient=orient)
+    else:
+        return jsonify({"success": False, "message": "Must define either wkt containing sites or a list of sites"}), 400
 
 @app.route("/met")
 def met_data():

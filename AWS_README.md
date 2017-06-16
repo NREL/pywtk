@@ -6,27 +6,34 @@ Use of wtk data with a python interface on AWS
 ## How to deploy
 
 1. Create a python virtual environment with requirements and code.  Must be done
-on a Linux64 system, ideally an AWS VM.
+on a Linux64 AWS VM due to custom compiled libraries.
 
-    * Setting up an AWS VM:
-        * Launch micro instance with AMI linux 64-bit and log in.
+    * Launch micro instance with AMI linux 64-bit and log in.
 
-            ```bash
-        ssh -i keyfile.pem ec2-user@ec2-54-183-146-226.us-west-1.compute.amazonaws.com
-        sudo yum upgrade
-        sudo yum install git
-        sudo yum groupinstall "Development Tools"
-        sudo yum install geos-devel
-        git clone https://github.com/NREL/pywtk.git
-        git checkout lambda
-```
-    * Prepare virtualenv for pywtk
-
-    ```bash
+        ```bash
+ssh -i keyfile.pem ec2-user@ec2-54-183-146-226.us-west-1.compute.amazonaws.com
+sudo yum upgrade
+sudo yum-config-manager --enable epel
+sudo yum install git
+sudo yum groupinstall "Development Tools"
+sudo yum install geos-devel hdf5-devel zlib-devel libffi-devel openssl-devel
+git clone https://github.com/NREL/pywtk.git
+git checkout lambda
+# Install python 3.6 with virtualenv
+# 3.6 is used for pip fixes and is the only python3 environment used by lambda
+# It has to be installed from source because there is no AMI package
+wget https://www.python.org/ftp/python/3.6.1/Python-3.6.1.tgz
+tar zxf Python-3.6.1.tgz
+cd Python-3.6.1
+./configure --prefix=$HOME/python3.6
+make; make install
+export PATH=$HOME/python3.6/bin:$PATH
 virtualenv pywtk_virtenv
-pip install --upgrade pip
+. pywtk_virtenv/bin/activate
 pip install -r requirements.txt
-python setup_aws.py install
+# Patch zappa here
+mkdir lib
+cp /usr/lib64/libgeos-3.4.2.so /usr/lib64/libgeos_c.so.1.8.2.so lib
 ```
 
 2. Setup AWS access
@@ -39,10 +46,15 @@ python setup_aws.py install
     * Add AWSLambdaExecute and AmazonS3ReadOnlyAccess Policies
     * Name the role "pywtk-lambda"
 
-4. Upload code to S3
+4. Create deployment zip and upload code to S3
 
     ```bash
-(cd pywtk_virtenv/lib/python2.7/site-packages; zip -r ../../../../pywtk_aws.zip *)
+(cd pywtk_virtenv/lib/python2.7/site-packages
+    zip -r ../../../../pywtk_aws.zip dateutil pytz pywtk six.py)
+(cd pywtk_virtenv/lib64/python2.7/site-packages
+    zip -r ../../../../pywtk_aws.zip h5py netCDF4 numpy pandas shapely)
+cp /usr/lib64/libgeos_c.so .
+zip -r pywtk_aws.zip libgeos_c.so
 aws s3 cp pywtk_aws.zip s3://pywtk-code/
 ```
 

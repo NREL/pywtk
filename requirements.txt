@@ -1,5 +1,7 @@
-cython
+Cython
+flask
 h5py
 netCDF4
 pandas
 shapely
+zappa
