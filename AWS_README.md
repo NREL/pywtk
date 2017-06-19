@@ -31,7 +31,7 @@ export PATH=$HOME/python3.6/bin:$PATH
 virtualenv pywtk_virtenv
 . pywtk_virtenv/bin/activate
 pip install -r requirements.txt
-# Patch zappa here
+(cd pywtk_virtenv/lib/python2.7/site-packages; patch -p1 < $HOME/pywtk/zappa.patch)
 mkdir lib
 cp /usr/lib64/libgeos-3.4.2.so /usr/lib64/libgeos_c.so.1.8.2.so lib
 ```

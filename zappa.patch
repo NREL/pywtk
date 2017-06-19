@@ -1,0 +1,15 @@
+diff --git a/zappa/core.py b/zappa/core.py
+index bc6a8ca..0de6129 100644
+--- a/zappa/core.py
++++ b/zappa/core.py
+@@ -449,6 +449,10 @@ class Zappa(object):
+                 copytree(cwd, temp_project_path, symlinks=False, ignore=shutil.ignore_patterns(*excludes))
+             else:
+                 copytree(cwd, temp_project_path, symlinks=False)
++        else:
++            # Copy lib/ directory over to support custom native libraries
++            copytree(os.path.join(cwd, "lib"), temp_project_path)
++
+ 
+         # If a handler_file is supplied, copy that to the root of the package,
+         # because that's where AWS Lambda looks for it. It can't be inside a package.
