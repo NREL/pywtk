@@ -26,7 +26,7 @@ class TestFlaskWTK(TestCase):
         resp_data = resp.get_data()
         ret_data = json.loads(resp_data)
         self.assertIn(site_id, ret_data)
-        df = pandas.read_json(ret_data[site_id])
+        df = pandas.read_json(json.dumps(ret_data[site_id]))
         first_row = df.ix[0].to_dict()
         for n,v in expected_dict.items():
             self.assertEqual(0, round((v - first_row[n])/v, 7))
@@ -48,7 +48,7 @@ class TestFlaskWTK(TestCase):
         resp_data = resp.get_data()
         ret_data = json.loads(resp_data)
         self.assertIn(site_id, ret_data)
-        fcst_data = pandas.read_json(ret_data[site_id])
+        fcst_data = pandas.read_json(json.dumps(ret_data[site_id]))
         self.assertEqual(25, len(fcst_data))
         for k, v in ex_dict.items():
             self.assertAlmostEqual(v, fcst_data.ix[0][k])

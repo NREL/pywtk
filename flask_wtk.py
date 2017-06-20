@@ -81,7 +81,7 @@ def met_data():
     try:
         for site_id in sites:
             #ret_dict[site_id] = get_wind_data(site_id, start, end).to_json()
-            ret_dict[site_id] = get_nc_data(site_id, start, end, attributes=MET_ATTRS, leap_day=True, utc=False, nc_dir=MET_LOC).to_json(orient=orient)
+            ret_dict[site_id] = json.loads(get_nc_data(site_id, start, end, attributes=MET_ATTRS, leap_day=True, utc=False, nc_dir=MET_LOC).reset_index().to_json(orient=orient))
         return jsonify(ret_dict)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 400
@@ -109,7 +109,7 @@ def fcst_data():
     try:
         for site_id in sites:
             #ret_dict[site_id] = get_nc_data(site_id, start, end).to_json()
-            ret_dict[site_id] = get_nc_data(site_id, start, end, attributes=FORECAST_ATTRS, leap_day=True, utc=False, nc_dir=FCST_LOC).to_json(orient=orient)
+            ret_dict[site_id] = json.loads(get_nc_data(site_id, start, end, attributes=FORECAST_ATTRS, leap_day=True, utc=False, nc_dir=FCST_LOC).reset_index().to_json(orient=orient))
         return jsonify(ret_dict)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 400
