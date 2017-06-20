@@ -213,6 +213,7 @@ def get_nc_data(site_id, start, end, attributes=None, leap_day=True, utc=False, 
         s3 =  boto3.client('s3')
         (bucket, directory) = nc_dir[5:].split("/", 1)
         key = os.path.join(directory, str(site/500), "%s.nc"%site)
+        _logger.info("Attempting to download from s3 bucket %s key %s", bucket, key)
         with NamedTemporaryFile(suffix="%s.nc"%site) as tfile:
             s3.download_file(Bucket=bucket, Key=key, Filename=tfile.name)
             #s3.download_fileobj(Bucket="pywtk-data", Key="met_data/0/90.nc", Fileobj=tfile)
