@@ -212,7 +212,7 @@ def get_nc_data(site_id, start, end, attributes=None, leap_day=True, utc=False, 
         import boto3
         s3 =  boto3.client('s3')
         (bucket, directory) = nc_dir[5:].split("/", 1)
-        key = os.path.join(directory, str(site/500), "%s.nc"%site)
+        key = os.path.join(directory, str(int(site/500)), "%s.nc"%site)
         _logger.info("Attempting to download from s3 bucket %s key %s", bucket, key)
         with NamedTemporaryFile(suffix="%s.nc"%site) as tfile:
             s3.download_file(Bucket=bucket, Key=key, Filename=tfile.name)
@@ -220,7 +220,7 @@ def get_nc_data(site_id, start, end, attributes=None, leap_day=True, utc=False, 
             data = get_nc_data_from_file(tfile.name, start, end, attributes=attributes, leap_day=leap_day, utc=utc, site_id=site)
         return data
     else:
-        site_file = os.path.join(nc_dir, str(site/500), "%s.nc"%site)
+        site_file = os.path.join(nc_dir, str(int(site/500)), "%s.nc"%site)
     _logger.info("Site file %s", site_file)
     return get_nc_data_from_file(site_file, start, end, attributes=attributes, leap_day=leap_day, utc=utc)
 
