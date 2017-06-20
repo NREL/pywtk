@@ -13,7 +13,7 @@ class TestAWSData(TestCase):
     def test_aws_wind_data(self):
         '''Pull nc data from AWS
         '''
-        filename = os.path.join(os.path.dirname(__file__), "53252.nc")
+        #filename = os.path.join(os.path.dirname(__file__), "53252.nc")
         nc_dir = "s3://pywtk-data/met_data"
         #wkt = "POINT(-103.128662109375 40.24179856487036)"
         attributes = ["power", "wind_direction", "wind_speed", "temperature",

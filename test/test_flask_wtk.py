@@ -13,8 +13,13 @@ class TestFlaskWTK(TestCase):
         site_id = "102445"
         start = pandas.Timestamp('2007-08-01', tz='utc')
         end = pandas.Timestamp('2007-08-15', tz='utc')
-        expected = [2007,8,1,0,0,1.178,0.9530000000000001,101280.25600000001,292.58,216.43200000000002,4.995]
-        expected_dict = dict(zip(["density", "power", "pressure", "temperature", "wind_direction", "wind_speed"], expected[5:]))
+        #expected = [2007,8,1,0,0,1.178,0.9530000000000001,101280.25600000001,292.58,216.43200000000002,4.995]
+        #expected_dict = dict(zip(["density", "power", "pressure", "temperature", "wind_direction", "wind_speed"], expected[5:]))
+        attributes = ["power", "wind_direction", "wind_speed", "temperature",
+                      "pressure","density"]
+        expected = [9.53277647e-01, 2.16432190e+02, 4.99592876e+00, 2.92580750e+02,
+                    1.01280258e+05, 1.17889750e+00]
+        expected_dict = dict(zip(attributes, expected))
         req = '/met?site_id=%s&start=%s&end=%s'%(site_id,start.value//10**9, end.value//10**9)
         #print "Request is %s"%req
         resp = self.app.get(req)
@@ -24,7 +29,7 @@ class TestFlaskWTK(TestCase):
         df = pandas.read_json(ret_data[site_id])
         first_row = df.ix[0].to_dict()
         for n,v in expected_dict.items():
-            self.assertAlmostEqual(v, first_row[n])
+            self.assertEqual(0, round((v - first_row[n])/v, 7))
         #self.assertEqual(expected_dict, df.ix[0].to_dict())
         self.assertEqual(14*24*12+1, len(df)) # End is inclusive of midnight
 

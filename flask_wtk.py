@@ -76,6 +76,7 @@ def met_data():
     start = pandas.Timestamp(int(request.args['start']), unit="s", tz='utc')
     end = pandas.Timestamp(int(request.args['end']), unit="s", tz='utc')
     #print "end is %s"%end
+    orient = "records"
     ret_dict = {}
     try:
         for site_id in sites:
@@ -103,6 +104,7 @@ def fcst_data():
     sites = request.args.getlist('site_id')
     start = pandas.Timestamp(int(request.args['start']), unit="s", tz='utc')
     end = pandas.Timestamp(int(request.args['end']), unit="s", tz='utc')
+    orient = "records"
     ret_dict = {}
     try:
         for site_id in sites:
