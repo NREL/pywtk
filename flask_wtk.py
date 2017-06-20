@@ -2,7 +2,10 @@
 from flask import Flask, json, request, jsonify
 import pandas
 from pywtk.site_lookup import get_3tiersites_from_wkt, timezones, sites
-from pywtk.wtk_api import get_wind_data, get_nc_data
+from pywtk.wtk_api import get_nc_data, FORECAST_ATTRS, MET_ATTRS
+
+MET_LOC = "s3://pywtk-data/met_data"
+FCST_LOC = "s3://pywtk-data/fcst_data"
 
 app = Flask(__name__)
 
@@ -57,6 +60,14 @@ def met_data():
         start - unix timestamp of start time
         end - unix timestamp of end time
 
+    Optional parameters:
+        orient - Pandas dataframe to_json orientation, defaults to records:
+            split, records, index, columns or values
+            See Pandas documentation for more info
+        attributes
+        leap_day
+        utc
+
     Returns:
         dict of site id to json representation of dataframes
     '''
@@ -68,24 +79,11 @@ def met_data():
     ret_dict = {}
     try:
         for site_id in sites:
-            ret_dict[site_id] = get_wind_data(site_id, start, end).to_json()
+            #ret_dict[site_id] = get_wind_data(site_id, start, end).to_json()
+            ret_dict[site_id] = get_nc_data(site_id, start, end, attributes=MET_ATTRS, leap_day=True, utc=False, nc_dir=MET_LOC).to_json(orient=orient)
         return jsonify(ret_dict)
-        '''
-    ret_json = "{"
-    try:
-        for idx, site_id in enumerate(sites, start=1):
-            print site_id
-            ret_json += '"%s": '%site_id
-            ret_json += get_wind_data(site_id, start, end).to_json()
-            if idx < len(sites):
-                ret_json += ", "
-        #print ret_json
-        ret_json += "}"
-        return ret_json
-    '''
-    except:
-        traceback.print_exc()
-        raise
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 400
 
 @app.route("/fcst")
 def fcst_data():
@@ -108,11 +106,11 @@ def fcst_data():
     ret_dict = {}
     try:
         for site_id in sites:
-            ret_dict[site_id] = get_nc_data(site_id, start, end).to_json()
+            #ret_dict[site_id] = get_nc_data(site_id, start, end).to_json()
+            ret_dict[site_id] = get_nc_data(site_id, start, end, attributes=FORECAST_ATTRS, leap_day=True, utc=False, nc_dir=FCST_LOC).to_json(orient=orient)
         return jsonify(ret_dict)
-    except:
-        traceback.print_exc()
-        raise
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 400
 
 
 

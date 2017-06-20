@@ -196,7 +196,8 @@ def get_nc_data(site_id, start, end, attributes=None, leap_day=True, utc=False, 
         utc - (boolean) Keep as UTC or convert to local time.  Defaults to local
         nc_dir - (String) Directory containing site nc files in specific layout,
                  Defaults to WIND_FCST_DIR, WIND_MET_NC_DIR is where met data is
-                 stored in nc format.
+                 stored in nc format.  Can work with s3:// URLs but attributes
+                 must be passed in.
 
     Returns:
         Pandas dataframe containing requested data
@@ -207,11 +208,22 @@ def get_nc_data(site_id, start, end, attributes=None, leap_day=True, utc=False, 
         elif nc_dir == WIND_MET_NC_DIR:
             attributes = MET_ATTRS
     site = int(site_id)
-    site_file = os.path.join(nc_dir, str(site/500), "%s.nc"%site)
+    if nc_dir.startswith("s3://"):
+        import boto3
+        s3 =  boto3.client('s3')
+        (bucket, directory) = nc_dir[5:].split("/", 1)
+        key = os.path.join(directory, str(site/500), "%s.nc"%site)
+        with NamedTemporaryFile(suffix="%s.nc"%site) as tfile:
+            s3.download_file(Bucket=bucket, Key=key, Filename=tfile.name)
+            #s3.download_fileobj(Bucket="pywtk-data", Key="met_data/0/90.nc", Fileobj=tfile)
+            data = get_nc_data_from_file(tfile.name, start, end, attributes=attributes, leap_day=leap_day, utc=utc, site_id=site)
+        return data
+    else:
+        site_file = os.path.join(nc_dir, str(site/500), "%s.nc"%site)
     _logger.info("Site file %s", site_file)
     return get_nc_data_from_file(site_file, start, end, attributes=attributes, leap_day=leap_day, utc=utc)
 
-def get_nc_data_from_file(filename, start, end, attributes=None, leap_day=True, utc=False):
+def get_nc_data_from_file(filename, start, end, attributes=None, leap_day=True, utc=False, site_id=None):
     '''Retrieve nc data from a file for a range of times that matches forecast
         and met layouts.
 
@@ -230,6 +242,8 @@ def get_nc_data_from_file(filename, start, end, attributes=None, leap_day=True, 
         nc_dir - (String) Directory containing site nc files in specific layout,
                  Defaults to WIND_FCST_DIR, WIND_MET_NC_DIR is where met data is
                  stored in nc format.
+        site_id - (String or int) Wind site id.  If not provided, this will be
+                  pulled from the filename.
 
     Returns:
         Pandas dataframe containing requested data
@@ -238,13 +252,18 @@ def get_nc_data_from_file(filename, start, end, attributes=None, leap_day=True, 
     # of the dataset
     site_tz = None
     filedir, filebase = os.path.split(filename)
-    try:
-        site_id = filebase[:-3]
+    if site_id:
         site = int(site_id)
-        site_tz = timezones.ix[site]['zoneName']
-        _logger.info("Site %s is in %s", site_id, site_tz)
-    except:
-        _logger.warning("Unable to determine site id from filename, should be format of site_id.nc")
+    else:
+        try:
+            site_id = filebase[:-3]
+            site = int(site_id)
+        except:
+            raise Exception("Unable to determine site id from filename, should be format of site_id.nc")
+    site_tz = timezones.ix[site]['zoneName']
+    _logger.info("Site %s is in %s", site_id, site_tz)
+    if utc == False and site_tz is None:
+        raise Exception("Use utc=True for sites without defined timezones")
 
     nc = netCDF4.Dataset(filename)
     data_size = nc.dimensions['time'].size
@@ -265,8 +284,6 @@ def get_nc_data_from_file(filename, start, end, attributes=None, leap_day=True, 
     ret_df.index = pandas.to_datetime(ret_df.pop('datetime'))
     ret_df.index = ret_df.index.tz_localize('utc')
     if utc == False:
-        if site_tz is None:
-            raise Exception("Use utc=True for sites without defined timezones")
         ret_df.index = ret_df.index.tz_convert(site_tz)
     for attr in attributes:
         ret_df[attr] = nc[attr][first_dp:last_dp]
