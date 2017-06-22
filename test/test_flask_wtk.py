@@ -4,10 +4,24 @@ import pandas
 from unittest import TestCase, skip
 import flask_wtk
 from pywtk.wtk_api import FORECAST_ATTRS
+import urllib
 
 class TestFlaskWTK(TestCase):
     def setUp(self):
         self.app = flask_wtk.app.test_client()
+
+    def test_sites(self):
+        site_id = "102445"
+        req = '/sites?site_id=%s&orient=records'%(site_id)
+        resp = self.app.get(req)
+        resp_data = resp.get_data()
+        ret_data = json.loads(resp_data)
+        expected = {"site_id":102445,"gid":102446,"fraction_of_usable_area":1.0,
+                    "power_curve":"offshore","capacity":16.0,"wind_speed":7.31,
+                    "capacity_factor":0.31,"the_geom":"0101000020E6100000F5D555815AAD51C0AEF204C24EDF4440",
+                    "city":None,"state":None,"country":None,"elevation":None,
+                    "lat":41.744591,"lon":-70.708649}
+        self.assertEqual(expected, ret_data[0])
 
     def test_met(self):
         site_id = "102445"
@@ -20,6 +34,17 @@ class TestFlaskWTK(TestCase):
         expected = [9.53277647e-01, 2.16432190e+02, 4.99592876e+00, 2.92580750e+02,
                     1.01280258e+05, 1.17889750e+00]
         expected_dict = dict(zip(attributes, expected))
+        # Bad attributes
+        req_args = {'site_id': site_id, 'start':start.value//10**9, 'end':end.value//10**9,
+                    'attributes': attributes+['bad_attribute']}
+        req = '/met?%s'%(urllib.urlencode(req_args))
+        #print "Request is %s"%req
+        resp = self.app.get(req)
+        resp_data = resp.get_data()
+        ret_data = json.loads(resp_data)
+        self.assertIn("success", ret_data)
+        self.assertFalse(ret_data["success"])
+        # Good data
         req = '/met?site_id=%s&start=%s&end=%s'%(site_id,start.value//10**9, end.value//10**9)
         #print "Request is %s"%req
         resp = self.app.get(req)
@@ -28,11 +53,11 @@ class TestFlaskWTK(TestCase):
         self.assertIn(site_id, ret_data)
         df = pandas.read_json(json.dumps(ret_data[site_id]))
         first_row = df.ix[0].to_dict()
+        print first_row
         for n,v in expected_dict.items():
             self.assertEqual(0, round((v - first_row[n])/v, 7))
         #self.assertEqual(expected_dict, df.ix[0].to_dict())
         self.assertEqual(14*24*12+1, len(df)) # End is inclusive of midnight
-
 
     def test_fcst(self):
         site_id = "53252"
