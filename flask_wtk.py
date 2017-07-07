@@ -112,7 +112,7 @@ def met_data():
         if len(attributes) == 0:
             attributes = MET_ATTRS
         if not set(attributes) <= set(MET_ATTRS):
-            return jsonify({"success": False, "message": "Attributes must be a set of %s"%MET_ATTRS}), 400
+            return jsonify({"success": False, "message": "Attributes must be a subset of %s"%MET_ATTRS}), 400
         ret_dict = {}
         for site_id in sites['site_id']:
             #ret_dict[site_id] = get_wind_data(site_id, start, end).to_json()
@@ -149,10 +149,15 @@ def fcst_data():
         orient = request.args.get("orient", "records")
         if orient not in ["split", "records", "index", "columns", "values"]:
             return jsonify({"success": False, "message": "Orient must be one of split, records, index, columns or values"}), 400
+        attributes = request.args.getlist("attributes")
+        if len(attributes) == 0:
+            attributes = FORECAST_ATTRS
+        if not set(attributes) <= set(FORECAST_ATTRS):
+            return jsonify({"success": False, "message": "Attributes must be a subset of %s"%FORECAST_ATTRS}), 400
         ret_dict = {}
         for site_id in sites['site_id']:
             #ret_dict[site_id] = get_nc_data(site_id, start, end).to_json()
-            ret_dict[site_id] = json.loads(get_nc_data(site_id, start, end, attributes=FORECAST_ATTRS, leap_day=True, utc=False, nc_dir=FCST_LOC).reset_index().to_json(orient=orient))
+            ret_dict[site_id] = json.loads(get_nc_data(site_id, start, end, attributes=attributes, leap_day=True, utc=False, nc_dir=FCST_LOC).reset_index().to_json(orient=orient))
         return jsonify(ret_dict)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 400
