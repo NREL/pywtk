@@ -116,7 +116,7 @@ def met_data():
         ret_dict = {}
         for site_id in sites['site_id']:
             #ret_dict[site_id] = get_wind_data(site_id, start, end).to_json()
-            ret_dict[site_id] = json.loads(get_nc_data(site_id, start, end, attributes=attributes, leap_day=True, utc=False, nc_dir=MET_LOC).reset_index().to_json(orient=orient))
+            ret_dict[str(site_id)] = json.loads(get_nc_data(site_id, start, end, attributes=attributes, leap_day=True, utc=False, nc_dir=MET_LOC).reset_index().to_json(orient=orient))
         return jsonify(ret_dict)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 400
@@ -157,7 +157,7 @@ def fcst_data():
         ret_dict = {}
         for site_id in sites['site_id']:
             #ret_dict[site_id] = get_nc_data(site_id, start, end).to_json()
-            ret_dict[site_id] = json.loads(get_nc_data(site_id, start, end, attributes=attributes, leap_day=True, utc=False, nc_dir=FCST_LOC).reset_index().to_json(orient=orient))
+            ret_dict[str(site_id)] = json.loads(get_nc_data(site_id, start, end, attributes=attributes, leap_day=True, utc=False, nc_dir=FCST_LOC).reset_index().to_json(orient=orient))
         return jsonify(ret_dict)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 400
