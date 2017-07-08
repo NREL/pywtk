@@ -235,8 +235,7 @@ def get_nc_data_from_file(filename, start, end, attributes=None, leap_day=True, 
 
     Optional Args:
         attributes - (List of Strings) List of attributes to retrieve
-                      from the database.  Limited to FORECAST_ATTRS.  Defaults to
-                      all available.
+                      from the database.
         leap_day - (boolean) Include leap day data or remove it.  Defaults to
                    True, include leap day data
         utc - (boolean) Keep as UTC or convert to local time.  Defaults to local
@@ -286,8 +285,9 @@ def get_nc_data_from_file(filename, start, end, attributes=None, leap_day=True, 
     ret_df.index = ret_df.index.tz_localize('utc')
     if utc == False:
         ret_df.index = ret_df.index.tz_convert(site_tz)
-    for attr in attributes:
-        ret_df[attr] = nc[attr][first_dp:last_dp]
+    _logger.info("Attributes are %s", attributes)
+    for atrb in attributes:
+        ret_df[atrb] = nc[atrb][first_dp:last_dp]
     if leap_day == False:
         ret_df = ret_df[~((ret_df.index.month == 2) & (ret_df.index.day == 29))]
     return ret_df
