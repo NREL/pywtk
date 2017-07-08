@@ -75,9 +75,7 @@ aws lambda create-function \
     --environment Variables={DATA_BUCKET=pywtk-data} \
     --memory-size 1024
 ```
-
     * Update code
-
   ```bash
 aws lambda update-function-code \
     --function-name pywtk-api \
@@ -104,8 +102,9 @@ fcst lambda services, as well as converting data into pandas dataframes for
 plotting.
 
 ## Available APIs
+
 * /sites - Wind site metadata
-  ```
+```
 Required parameters one of:
     site_id - list of site_ids
     wkt - Well known text
@@ -120,8 +119,10 @@ Optional parameters:
 Returns:
     json string representation of sites
 ```
+
 * /met - Metrology data
-  ```
+
+```
 Required parameters:
     site_id | wkt - list of site_ids or Well known text geometry
     start - unix timestamp of start time
@@ -142,9 +143,9 @@ Returns:
     dict of site id to json representation of dataframes
 ```
 
-* /met - Forecast data
+* /fcst - Forecast data
 
-  ```
+```
 Required parameters:
     site_id | wkt - list of site_ids or Well known text geometry
     start - unix timestamp of start time
