@@ -126,6 +126,9 @@ def fcst_data():
     '''Return forecast data from the nc files as to_json representation of pandas
     dataframe.
 
+    TODO: Zappa proxy passes only one of arg lists into the flask method.
+          Multiple site_ids or attributes will not work
+
     Required parameters:
         site_id | wkt - list of site_ids or Well known text geometry
         start - unix timestamp of start time
@@ -137,6 +140,8 @@ def fcst_data():
             See Pandas documentation for more info
         max_point_return - Maximum number of closest sites to a POINT wkt, defaults
             to 1.  Will be ignored for all other cases.
+        attributes - List of string attributes to return, will fail if attribute
+            is not valid for the data set
 
     Returns:
         dict of site id to json representation of dataframes
