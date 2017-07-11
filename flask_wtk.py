@@ -18,7 +18,7 @@ def get_sites_from_request(request):
     '''Return sites from a list of site_ids or within a WKT definition.
 
     Required parameters one of:
-        site_id - list of site_ids
+        sites - String list of site_ids separated by commas
         wkt - Well known text
 
     Optional parameters:
@@ -28,7 +28,7 @@ def get_sites_from_request(request):
     Returns:
         pandas dataframe of sites
     '''
-    if "wkt" in request.args and "site_id" not in request.args:
+    if "wkt" in request.args and "sites" not in request.args:
         wkt = request.args["wkt"]
         if 'POINT' in wkt:
             max_point_return = request.args.get("max_point_return", 1, type=int)
@@ -36,8 +36,8 @@ def get_sites_from_request(request):
         else:
             wkt_indexes = pywtk.site_lookup.get_3tiersites_from_wkt(wkt).index
         return pywtk.site_lookup.sites.loc[wkt_indexes].reset_index().drop('point', axis=1)
-    elif "wkt" not in request.args and "site_id" in request.args:
-        site_list = request.args.getlist('site_id', type=int)
+    elif "wkt" not in request.args and "sites" in request.args:
+        site_list = map(int, request.args.get('sites', "").split(","))
         return pywtk.site_lookup.sites.loc[site_list].copy().reset_index().drop('point', axis=1)
     else:
         raise Exception("Must define either wkt containing sites or a list of sites")
@@ -49,10 +49,10 @@ def boolean_type(in_str):
 
 @app.route("/sites")
 def sites_request():
-    '''Return sites from a list of site_ids or within a WKT definition.
+    '''Return sites from a list of sites or within a WKT definition.
 
     Required parameters one of:
-        site_id - list of site_ids
+        sites - string of site_ids separated by commas
         wkt - Well known text
 
     Optional parameters:
@@ -80,7 +80,7 @@ def met_data():
     dataframe.
 
     Required parameters:
-        site_id | wkt - list of site_ids or Well known text geometry
+        sites | wkt - string of comma-separated site_ids or Well known text geometry
         start - unix timestamp of start time
         end - unix timestamp of end time
 
@@ -90,29 +90,28 @@ def met_data():
             See Pandas documentation for more info
         max_point_return - Maximum number of closest sites to a POINT wkt, defaults
             to 1.  Will be ignored for all other cases.
-        attributes - List of string attributes to return, will fail if attribute
-            is not valid for the data set
+        attributes - string attributes separated by commas to return, will fail
+                     if attribute is not valid for the data set
         leap_day - Bool to include leap day.  Defaults to True
         utc - Bool to use UTC rather than site local time.  Defaults to True
 
     Returns:
         dict of site id to json representation of dataframes
     '''
-    #sites = request.args.getlist('site_id')
     try:
         sites = get_sites_from_request(request)
-        #print "start is %s"%request.args['start']
         start = pandas.Timestamp(request.args.get('start', type=int), unit="s", tz='utc')
         end = pandas.Timestamp(request.args.get('end', type=int), unit="s", tz='utc')
-        #print "end is %s"%end
         orient = request.args.get("orient", "records")
         if orient not in ["split", "records", "index", "columns", "values"]:
             return jsonify({"success": False, "message": "Orient must be one of split, records, index, columns or values"}), 400
-        attributes = request.args.getlist("attributes")
-        if len(attributes) == 0:
+        if request.args.has_key("attributes"):
+            attributes = request.args.get("attributes", "").split(",")
+            if not set(attributes) <= set(MET_ATTRS):
+                return jsonify({"success": False, "message": "Attributes must be a subset of %s"%MET_ATTRS}), 400
+        else:
             attributes = MET_ATTRS
-        if not set(attributes) <= set(MET_ATTRS):
-            return jsonify({"success": False, "message": "Attributes must be a subset of %s"%MET_ATTRS}), 400
+
         ret_dict = {}
         for site_id in sites['site_id']:
             #ret_dict[site_id] = get_wind_data(site_id, start, end).to_json()
@@ -126,11 +125,11 @@ def fcst_data():
     '''Return forecast data from the nc files as to_json representation of pandas
     dataframe.
 
-    TODO: Zappa proxy passes only one of arg lists into the flask method.
+    TODO: AWS API Gateway proxy passes only one of arg lists into the flask method.
           Multiple site_ids or attributes will not work
 
     Required parameters:
-        site_id | wkt - list of site_ids or Well known text geometry
+        sites | wkt - string of comma-separated site_ids or Well known text geometry
         start - unix timestamp of start time
         end - unix timestamp of end time
 
@@ -140,13 +139,12 @@ def fcst_data():
             See Pandas documentation for more info
         max_point_return - Maximum number of closest sites to a POINT wkt, defaults
             to 1.  Will be ignored for all other cases.
-        attributes - List of string attributes to return, will fail if attribute
+        attributes - String of comma-separated attributes to return, will fail if attribute
             is not valid for the data set
 
     Returns:
         dict of site id to json representation of dataframes
     '''
-    #sites = request.args.getlist('site_id')
     try:
         sites = get_sites_from_request(request)
         start = pandas.Timestamp(request.args.get('start', type=int), unit="s", tz='utc')
@@ -154,11 +152,12 @@ def fcst_data():
         orient = request.args.get("orient", "records")
         if orient not in ["split", "records", "index", "columns", "values"]:
             return jsonify({"success": False, "message": "Orient must be one of split, records, index, columns or values"}), 400
-        attributes = request.args.getlist("attributes")
-        if len(attributes) == 0:
+        if request.args.has_key("attributes"):
+            attributes = request.args.get("attributes", "").split(",")
+            if not set(attributes) <= set(FORECAST_ATTRS):
+                return jsonify({"success": False, "message": "Attributes must be a subset of %s"%FORECAST_ATTRS}), 400
+        else:
             attributes = FORECAST_ATTRS
-        if not set(attributes) <= set(FORECAST_ATTRS):
-            return jsonify({"success": False, "message": "Attributes must be a subset of %s"%FORECAST_ATTRS}), 400
         ret_dict = {}
         for site_id in sites['site_id']:
             #ret_dict[site_id] = get_nc_data(site_id, start, end).to_json()

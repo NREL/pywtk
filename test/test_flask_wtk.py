@@ -12,7 +12,7 @@ class TestFlaskWTK(TestCase):
 
     def test_sites(self):
         site_id = "102445"
-        req = '/sites?site_id=%s&orient=records'%(site_id)
+        req = '/sites?sites=%s&orient=records'%(site_id)
         resp = self.app.get(req)
         resp_data = resp.get_data()
         ret_data = json.loads(resp_data)
@@ -22,6 +22,18 @@ class TestFlaskWTK(TestCase):
                     "city":None,"state":None,"country":None,"elevation":None,
                     "lat":41.744591,"lon":-70.708649}
         self.assertEqual(expected, ret_data[0])
+        wkt = "POLYGON((-120.82763671875 34.452218472826566,-119.19616699218749 34.452218472826566,-119.19616699218749 33.920571528675104,-120.82763671875 33.920571528675104,-120.82763671875 34.452218472826566))"
+        req = '/sites?wkt=%s&orient=columns'%(wkt)
+        resp = self.app.get(req)
+        resp_data = resp.get_data()
+        ret_data = json.loads(resp_data)
+        expected = [29375, 29733, 29872, 30019, 30190, 30539, 30712, 30713,
+                    30873, 30874, 31032, 31033, 31034, 31189, 31190, 31191,
+                    31192, 31320, 31321, 31322, 31323, 31324, 31563, 32060,
+                    32314, 32834, 33203, 34828]
+        site_ids = ret_data['site_id'].values()
+        for site_id in expected:
+            self.assertIn(site_id, site_ids)
 
     def test_met(self):
         site_id = "102445"
@@ -35,8 +47,8 @@ class TestFlaskWTK(TestCase):
                     1.01280258e+05, 1.17889750e+00]
         expected_dict = dict(zip(attributes, expected))
         # Bad attributes
-        req_args = {'site_id': site_id, 'start':start.value//10**9, 'end':end.value//10**9,
-                    'attributes': attributes+['bad_attribute']}
+        req_args = {'sites': site_id, 'start':start.value//10**9, 'end':end.value//10**9,
+                    'attributes': ",".join(attributes)+',bad_attribute'}
         req = '/met?%s'%(urllib.urlencode(req_args))
         #print "Request is %s"%req
         resp = self.app.get(req)
@@ -45,7 +57,7 @@ class TestFlaskWTK(TestCase):
         self.assertIn("success", ret_data)
         self.assertFalse(ret_data["success"])
         # Good data
-        req = '/met?site_id=%s&start=%s&end=%s'%(site_id,start.value//10**9, end.value//10**9)
+        req = '/met?sites=%s&start=%s&end=%s'%(site_id,start.value//10**9, end.value//10**9)
         #print "Request is %s"%req
         resp = self.app.get(req)
         resp_data = resp.get_data()
@@ -53,7 +65,6 @@ class TestFlaskWTK(TestCase):
         self.assertIn(site_id, ret_data)
         df = pandas.read_json(json.dumps(ret_data[site_id]))
         first_row = df.ix[0].to_dict()
-        print first_row
         for n,v in expected_dict.items():
             self.assertEqual(0, round((v - first_row[n])/v, 7))
         #self.assertEqual(expected_dict, df.ix[0].to_dict())
@@ -67,7 +78,7 @@ class TestFlaskWTK(TestCase):
                     6.384234, 0.26309761, 3.6874273, 1.4196928, 0.53551841,
                     10.572015, 13.249797, 10.526829, 10.306773], dtype='float32')
         ex_dict = dict(zip(FORECAST_ATTRS, expected))
-        req = '/fcst?site_id=%s&start=%s&end=%s'%(site_id,start.value//10**9, end.value//10**9)
+        req = '/fcst?sites=%s&start=%s&end=%s'%(site_id,start.value//10**9, end.value//10**9)
         #print "Request is %s"%req
         resp = self.app.get(req)
         resp_data = resp.get_data()
