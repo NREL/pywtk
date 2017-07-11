@@ -10,7 +10,7 @@ on a Linux64 AWS VM due to custom compiled libraries.
 
     * Launch micro instance with AMI linux 64-bit and log in.
 
-        ```bash
+  ```bash
 ssh -i keyfile.pem ec2-user@ec2-54-183-146-226.us-west-1.compute.amazonaws.com
 sudo yum upgrade
 sudo yum-config-manager --enable epel
@@ -48,7 +48,7 @@ cp /usr/lib64/libgeos-3.4.2.so /usr/lib64/libgeos_c.so.1.8.2.so lib
 
 4. Create deployment zip and upload code to S3
 
-    ```bash
+  ```bash
 zappa update dev
 
 
@@ -63,7 +63,7 @@ aws s3 cp pywtk_aws.zip s3://pywtk-code/
 
 5. Create lambda function
 
-    ```bash
+  ```bash
 aws lambda create-function \
     --region us-west-2 \
     --function-name pywtk-api \
@@ -75,10 +75,8 @@ aws lambda create-function \
     --environment Variables={DATA_BUCKET=pywtk-data} \
     --memory-size 1024
 ```
-
     * Update code
-
-        ```bash
+  ```bash
 aws lambda update-function-code \
     --function-name pywtk-api \
     --s3-bucket pywtk-code \
@@ -87,7 +85,7 @@ aws lambda update-function-code \
 
 6. Wire lambda into API Gateway and test
 
-    ```json
+  ```json
     {"type": "site",
  "sites": ["1001"]
 }
@@ -104,8 +102,9 @@ fcst lambda services, as well as converting data into pandas dataframes for
 plotting.
 
 ## Available APIs
-* /sites - Wind site metadata
 
+* /sites - Wind site metadata
+```
 Required parameters one of:
     site_id - list of site_ids
     wkt - Well known text
@@ -119,9 +118,11 @@ Optional parameters:
 
 Returns:
     json string representation of sites
+```
 
 * /met - Metrology data
 
+```
 Required parameters:
     site_id | wkt - list of site_ids or Well known text geometry
     start - unix timestamp of start time
@@ -140,9 +141,11 @@ Optional parameters:
 
 Returns:
     dict of site id to json representation of dataframes
+```
 
-* /met - Forecast data
+* /fcst - Forecast data
 
+```
 Required parameters:
     site_id | wkt - list of site_ids or Well known text geometry
     start - unix timestamp of start time
@@ -157,3 +160,4 @@ Optional parameters:
 
 Returns:
     dict of site id to json representation of dataframes
+```
