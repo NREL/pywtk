@@ -105,7 +105,7 @@ def met_data():
         orient = request.args.get("orient", "records")
         if orient not in ["split", "records", "index", "columns", "values"]:
             return jsonify({"success": False, "message": "Orient must be one of split, records, index, columns or values"}), 400
-        if request.args.has_key("attributes"):
+        if "attributes" in request.args:
             attributes = request.args.get("attributes", "").split(",")
             if not set(attributes) <= set(MET_ATTRS):
                 return jsonify({"success": False, "message": "Attributes must be a subset of %s"%MET_ATTRS}), 400
@@ -152,7 +152,7 @@ def fcst_data():
         orient = request.args.get("orient", "records")
         if orient not in ["split", "records", "index", "columns", "values"]:
             return jsonify({"success": False, "message": "Orient must be one of split, records, index, columns or values"}), 400
-        if request.args.has_key("attributes"):
+        if "attributes" in request.args:
             attributes = request.args.get("attributes", "").split(",")
             if not set(attributes) <= set(FORECAST_ATTRS):
                 return jsonify({"success": False, "message": "Attributes must be a subset of %s"%FORECAST_ATTRS}), 400
