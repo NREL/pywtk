@@ -351,7 +351,7 @@ def get_nc_data_from_url(url, site_id, start, end, attributes, leap_day=True, ut
     # Create dataframe from json object
     master_df = pandas.DataFrame(master_data)
     # Convert timestamp and index
-    master_df.index = pandas.to_datetime(master_df.pop('datetime'))
+    master_df.index = pandas.to_datetime(master_df.pop('datetime')*10**6)
     master_df.index = master_df.index.tz_localize('utc')
     master_df = master_df[attributes]
     #master_df.set_index(pandas.DatetimeIndex(master_df["datetime"]*10**6))

@@ -29,6 +29,7 @@ class TestGetWindData(TestCase):
                     1.01280258e+05, 1.17889750e+00]
         numpy.testing.assert_allclose(expected, wind_data.ix[0].values)
         self.assertEqual(14*24*12+1, len(wind_data)) # End is inclusive of midnight
+        self.assertEqual(start, wind_data.index[0])
         utc = False
         start = pandas.Timestamp('2007-08-01', tz='America/New_York')
         end = pandas.Timestamp('2007-08-15', tz='America/New_York')
@@ -45,6 +46,7 @@ class TestGetWindData(TestCase):
         numpy.testing.assert_allclose(expected, wind_data.ix[0].values)
         self.assertEqual(14*24*12+1, len(wind_data)) # End is inclusive of midnight
 
+    @skip
     def test_multiple_years(self):
         '''Pull multiple years using hdf data
         '''
