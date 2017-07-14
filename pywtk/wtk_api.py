@@ -1,9 +1,10 @@
 import csv
 import h5py
 import logging
+import math
 import netCDF4
-import os
 import numpy
+import os
 import pandas
 from tempfile import NamedTemporaryFile
 from zipfile import ZipFile
@@ -264,7 +265,6 @@ def get_nc_data_from_file(filename, start, end, attributes=None, leap_day=True, 
     _logger.info("Site %s is in %s", site_id, site_tz)
     if utc == False and site_tz is None:
         raise Exception("Use utc=True for sites without defined timezones")
-
     nc = netCDF4.Dataset(filename)
     data_size = nc.dimensions['time'].size
     _logger.info("Site data points %s", data_size)
@@ -273,13 +273,14 @@ def get_nc_data_from_file(filename, start, end, attributes=None, leap_day=True, 
     _logger.info("After conversion dates are %s to %s", min_dt, max_dt)
     start_time = min_dt.value // 10 ** 9
     end_time = max_dt.value // 10 ** 9
-    first_dp = max(0, int((start_time - nc.start_time)/nc.sample_period))
-    last_dp = min(data_size, int((end_time - nc.start_time)/nc.sample_period) + 1)
-    _logger.info("Reading %s:%s", first_dp, last_dp)
+    # Convert the min_dt and max_dt to match the sample_period, getting the data indexes
+    start_idx = max(0, int(math.ceil((start_time - nc.start_time)/float(nc.sample_period))))
+    end_idx = min(data_size, int(math.floor((end_time - nc.start_time)/float(nc.sample_period))) + 1)
+    _logger.info("Reading %s:%s", start_idx, end_idx)
     ret_df = pandas.DataFrame()
-    # TODO: Convert timestamp to tz sensitive datetime.
-    ret_df['datetime'] = numpy.arange(min_dt.value, max_dt.value + 10 ** 9, int(nc.sample_period) * 10 ** 9)
-    #year_df['datetime'] = h5_file[H5_TIME_INDEX_NAME][:]
+    ret_df['datetime'] = numpy.arange((nc.start_time + start_idx * int(nc.sample_period)) * 10 ** 9,
+                                      (nc.start_time + end_idx * int(nc.sample_period)) * 10 ** 9,
+                                      int(nc.sample_period) * 10 ** 9)
     # Someone with better pandas skills will code this nicer
     ret_df.index = pandas.to_datetime(ret_df.pop('datetime'))
     ret_df.index = ret_df.index.tz_localize('utc')
@@ -287,10 +288,68 @@ def get_nc_data_from_file(filename, start, end, attributes=None, leap_day=True, 
         ret_df.index = ret_df.index.tz_convert(site_tz)
     _logger.info("Attributes are %s", attributes)
     for atrb in attributes:
-        ret_df[atrb] = nc[atrb][first_dp:last_dp]
+        ret_df[atrb] = nc[atrb][start_idx:end_idx]
     if leap_day == False:
         ret_df = ret_df[~((ret_df.index.month == 2) & (ret_df.index.day == 29))]
     return ret_df
 
 # Backwards compatability
 get_forecast_data = get_nc_data
+
+def get_nc_data_from_url(url, site_id, start, end, attributes, leap_day=True, utc=False):
+    '''Retrieve nc data from a URL for a range of times that matches forecast
+        and met layouts.  Pieces together multiple lambda calls assuming 500k
+        per attribute per month.
+
+    Required Args:
+        url - (String) url of flask service
+        site_id - (String or int) Wind site id.
+        start - (pandas.Timestamp) Timestamp for start of data
+        end - (pandas.Timestamp) Timestamp for end of data
+        attributes - (List of Strings) List of attributes to retrieve from the
+                     nc file.
+
+    Optional Args:
+        leap_day - (boolean) Include leap day data or remove it.  Defaults to
+                   True, include leap day data
+        utc - (boolean) Keep as UTC or convert to local time.  Defaults to local
+
+    Returns:
+        Pandas dataframe containing requested data
+    '''
+    # Chunk attributes, keep attributes together for easy stitching of times
+    # Response for lambda maxes at 6MB, one month of one attribute is ~500kB
+    # TODO: fcst or met have different sizes
+    import requests
+    MAX_CHUNK = 12 * (60 * 60 * 24 * 30) # Seconds
+    start_ts = start.value//10**9
+    end_ts = end.value//10**9
+    chunk_size = MAX_CHUNK / len(attributes)
+    _logger.info("Breaking into %s requests", (end_ts - start_ts)/chunk_size + 1)
+    # Pull data for each chunk into the master json object
+    master_data = []
+    end_chunk = min(start_ts + chunk_size, end_ts)
+    params = {"start":start_ts, "end":end_chunk, "attributes":",".join(attributes), "sites":site_id}
+    while True:
+        resp = requests.get(url, params=params)
+        # TODO: Check for bad reply
+        _logger.info("params %s", params)
+        #_logger.info("response %s", resp.text)
+        resp_json = resp.json()
+        if str(site_id) not in resp_json:
+            raise Exception(resp.text)
+        master_data += resp_json[str(site_id)]
+        params["start"] = end_chunk + 1
+        end_chunk = min(end_chunk + chunk_size, end_ts)
+        params["end"] = end_chunk
+        if end_chunk == end_ts:
+            break
+    # Create dataframe from json object
+    master_df = pandas.DataFrame(master_data)
+    # Convert timestamp and index
+    master_df.index = pandas.to_datetime(master_df.pop('datetime'))
+    master_df.index = master_df.index.tz_localize('utc')
+    master_df = master_df[attributes]
+    #master_df.set_index(pandas.DatetimeIndex(master_df["datetime"]*10**6))
+    # Return dataframe
+    return master_df
