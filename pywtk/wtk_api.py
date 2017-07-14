@@ -320,6 +320,7 @@ def get_nc_data_from_url(url, site_id, start, end, attributes, leap_day=True, ut
     # Chunk attributes, keep attributes together for easy stitching of times
     # Response for lambda maxes at 6MB, one month of one attribute is ~500kB
     # TODO: fcst or met have different sizes
+    # TODO: Support leap day
     import requests
     MAX_CHUNK = 12 * (60 * 60 * 24 * 30) # Seconds
     start_ts = start.value//10**9
@@ -338,12 +339,15 @@ def get_nc_data_from_url(url, site_id, start, end, attributes, leap_day=True, ut
         resp_json = resp.json()
         if str(site_id) not in resp_json:
             raise Exception(resp.text)
+        _logger.info("first entry %s"%resp_json[str(site_id)][0])
+        _logger.info("last entry %s"%resp_json[str(site_id)][-1])
+
         master_data += resp_json[str(site_id)]
+        if end_chunk == end_ts:
+            break
         params["start"] = end_chunk + 1
         end_chunk = min(end_chunk + chunk_size, end_ts)
         params["end"] = end_chunk
-        if end_chunk == end_ts:
-            break
     # Create dataframe from json object
     master_df = pandas.DataFrame(master_data)
     # Convert timestamp and index
