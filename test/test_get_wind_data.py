@@ -73,7 +73,7 @@ class TestGetWindData(TestCase):
         leap_day = False
         utc = False
         ''' Extra cruft
-        &site_url=wind-toolkit%2Fwind%2Fwtk_download.json&full_name=Harry+Sorensen&email=harry.sorensen%40nrel.gov&affiliation=NREL&mailing_list=false&reason=Development+testing
+        &site_url=wind-toolkit%2Fwind%2Fwtk_download.json&full_name=Your+Name&email=your.email%40here&affiliation=NREL&mailing_list=false&reason=Development+testing
         '''
         print "CO save data"
         wind_data = get_wind_data(wkt, names, attributes=attributes, leap_day=leap_day, utc=utc)
