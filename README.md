@@ -8,16 +8,30 @@ Use of wtk data with a python interface
 Create a conda environment and install pywtk
 
 ```bash
-module purge; module load conda 
+module purge; module load conda
 conda env update -n pywtk
 source activate pywtk
 python setup.py install
 ```
 
+### Download wind data and use local copy
+The complete data set is 2.4 TB
+
+```bash
+aws s3 sync s3://pywtk-data/ /local-data-dir/
+```
+
+* Modify pywtk/wtk_api.py in your source then run python setup.py install
+
+```bash
+WIND_FCST_DIR = "/local-data-dir/fcst_data"
+WIND_MET_NC_DIR = "/local-data-dir/met_data"
+```
+
 ## Example notebooks
 
 On peregrine run the start_notebook.sh in the notebooks/ directory.  When accessing the notebook
-for the first time, look for the token parameter in the URL that shows the server you have 
+for the first time, look for the token parameter in the URL that shows the server you have
 access.  Otherwise you will be prompted for a password that won't work.
 
   ```bash
@@ -30,7 +44,7 @@ Then open your browser to http://localhost:8888/
 [I 09:47:36.242 NotebookApp] ✓ nbpresent HTML export ENABLED
 [W 09:47:36.242 NotebookApp] ✗ nbpresent PDF export DISABLED: No module named nbbrowserpdf.exporters.pdf
 [I 09:47:36.250 NotebookApp] Serving notebooks from local directory: /home/hsorense/projects/wind2plexos
-[I 09:47:36.250 NotebookApp] 0 active kernels 
+[I 09:47:36.250 NotebookApp] 0 active kernels
 [I 09:47:36.250 NotebookApp] The Jupyter Notebook is running at: http://0.0.0.0:8888/?token=c7c42d73e5e7954688873ab27c79207977c335829385b30d
 ```
 
