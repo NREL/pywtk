@@ -9,6 +9,7 @@ MET_LOC = "s3://pywtk-data/met_data"
 FCST_LOC = "s3://pywtk-data/fcst_data"
 
 app = Flask(__name__)
+app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
 
 @app.route("/")
 def heartbeat():

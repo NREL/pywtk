@@ -320,12 +320,26 @@ def get_nc_data_from_url(url, site_id, start, end, attributes, leap_day=True, ut
     # Chunk attributes, keep attributes together for easy stitching of times
     # Response for lambda maxes at 6MB, one month of one attribute is ~500kB
     # TODO: fcst or met have different sizes
-    # TODO: Support leap day
-    import requests
-    MAX_CHUNK = 12 * (60 * 60 * 24 * 30) # Seconds
     start_ts = start.value//10**9
     end_ts = end.value//10**9
-    chunk_size = MAX_CHUNK / len(attributes)
+    # Calculate time / chunk = 6MB/chunk / SPP B/ data point / (num attributes + datetime) data points / time step * time per step
+    if url.endswith("fcst"):
+        # Forecast is about 33 bytes per data point per attribute (datetime is one)
+        #          has one data point per hour
+        data_points = (end_ts - start_ts) / 3600
+        time_per_step = 3600
+        bytes_per_dp = 34
+    else:
+        # Met is about 25 bytes per data point per attribute (datetime is one)
+        #     has one data point per 5 minutes
+        time_per_step = 300
+        data_points = (end_ts - start_ts) / 300
+        bytes_per_dp = 26
+    chunk_size = 6000000 / bytes_per_dp / (len(attributes) + 1) * time_per_step
+    # TODO: Support leap day
+    import requests
+    #MAX_CHUNK = 12 * (60 * 60 * 24 * 30) # Seconds
+    #chunk_size = MAX_CHUNK / len(attributes)
     _logger.info("Breaking into %s requests", (end_ts - start_ts)/chunk_size + 1)
     # Pull data for each chunk into the master json object
     master_data = []

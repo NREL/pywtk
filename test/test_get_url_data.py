@@ -12,7 +12,7 @@ WTK_URL = "https://h2oq9ul559.execute-api.us-west-2.amazonaws.com/dev"
 
 class TestGetWindData(TestCase):
     def test_part_year(self):
-        '''Pull part of a year
+        '''Pull part of a year using URL
         '''
         attributes = ["power", "wind_direction", "wind_speed", "temperature",
                       "pressure","density"]
@@ -46,9 +46,8 @@ class TestGetWindData(TestCase):
         numpy.testing.assert_allclose(expected, wind_data.ix[0].values)
         self.assertEqual(14*24*12+1, len(wind_data)) # End is inclusive of midnight
 
-    @skip
     def test_multiple_years(self):
-        '''Pull multiple years using hdf data
+        '''Pull multiple years using URL
         '''
         attributes = ["power", "wind_direction", "wind_speed", "temperature",
                       "pressure","density"]
