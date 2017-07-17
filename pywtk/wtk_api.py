@@ -335,7 +335,9 @@ def get_nc_data_from_url(url, site_id, start, end, attributes, leap_day=True, ut
         time_per_step = 300
         data_points = (end_ts - start_ts) / 300
         bytes_per_dp = 26
-    chunk_size = 6000000 / bytes_per_dp / (len(attributes) + 1) * time_per_step
+    # AWS Lambda limit says 6MB, more like 4MB in real testing
+    #chunk_size = 6000000 / bytes_per_dp / (len(attributes) + 1) * time_per_step
+    chunk_size = 4000000 / bytes_per_dp / (len(attributes) + 1) * time_per_step
     # TODO: Support leap day
     import requests
     #MAX_CHUNK = 12 * (60 * 60 * 24 * 30) # Seconds
