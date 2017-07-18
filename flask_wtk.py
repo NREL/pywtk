@@ -1,5 +1,5 @@
 # Flask setup
-from flask import Flask, json, request, jsonify
+from flask import Flask, json, request, jsonify, send_from_directory
 import pandas
 #from pywtk.site_lookup import get_3tiersites_from_wkt, timezones, sites
 import pywtk.site_lookup
@@ -13,7 +13,7 @@ app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
 
 @app.route("/")
 def heartbeat():
-    return ""
+    return send_from_directory('static', 'index.html')
 
 def get_sites_from_request(request):
     '''Return sites from a list of site_ids or within a WKT definition.
@@ -66,10 +66,12 @@ def sites_request():
     Returns:
         json string representation of sites
     '''
+    if len(request.args) == 0:
+        return send_from_directory('static', 'sites.html')
     try:
         sites = get_sites_from_request(request)
     except Exception as e:
-        jsonify({"success": False, "message": str(e)}), 400
+        return jsonify({"success": False, "message": str(e)}), 400
     orient = request.args.get("orient", "records")
     if orient not in ["split", "records", "index", "columns", "values"]:
         return jsonify({"success": False, "message": "Orient must be one of split, records, index, columns or values"}), 400
@@ -99,6 +101,8 @@ def met_data():
     Returns:
         dict of site id to json representation of dataframes
     '''
+    if len(request.args) == 0:
+        return send_from_directory('static', 'met.html')
     try:
         sites = get_sites_from_request(request)
         start = pandas.Timestamp(request.args.get('start', type=int), unit="s", tz='utc')
@@ -126,9 +130,6 @@ def fcst_data():
     '''Return forecast data from the nc files as to_json representation of pandas
     dataframe.
 
-    TODO: AWS API Gateway proxy passes only one of arg lists into the flask method.
-          Multiple site_ids or attributes will not work
-
     Required parameters:
         sites | wkt - string of comma-separated site_ids or Well known text geometry
         start - unix timestamp of start time
@@ -146,6 +147,8 @@ def fcst_data():
     Returns:
         dict of site id to json representation of dataframes
     '''
+    if len(request.args) == 0:
+        return send_from_directory('static', 'fcst.html')
     try:
         sites = get_sites_from_request(request)
         start = pandas.Timestamp(request.args.get('start', type=int), unit="s", tz='utc')
