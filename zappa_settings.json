@@ -1,0 +1,13 @@
+{
+    "dev": {
+        "app_function": "flask_wtk.app",
+        "aws_region": "us-west-2",
+        "profile_name": "default",
+        "s3_bucket": "pywtk-code",
+        "runtime":"python3.6",
+        "slim_handler": true,
+        "environment_variables": {
+            "DATA_BUCKET": "pywtk-data"
+        }
+    }
+}
