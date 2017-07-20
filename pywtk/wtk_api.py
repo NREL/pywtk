@@ -394,7 +394,12 @@ def site_from_cache(site_id, nc_dir):
     Required Args:
         site_id - (String or int) Wind site id.
         nc_dir - Directory to check for data
+
+    Returns:
+        String path for site data file
     '''
+    if "PYWTK_CACHE_DIR" not in os.environ:
+        raise Exception("Set environment variable PYWTK_CACHE_DIR to utilize the cache")
     import boto3
     from botocore import UNSIGNED
     from botocore.client import Config
