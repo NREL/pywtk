@@ -12,20 +12,33 @@ from zipfile import ZipFile
 from pywtk.site_lookup import get_3tiersites_from_wkt, timezones, sites
 
 _logger = logging.getLogger(__name__)
-WIND_FCST_DIR = "/projects/hpc-apps/wtk/data/fcst_data"
 FORECAST_ATTRS = [ "day_ahead_power", "hour_ahead_power", "4_hour_ahead_power",
                    "6_hour_ahead_power", "day_ahead_power_p90", "hour_ahead_power_p90",
                    "4_hour_ahead_power_p90", "6_hour_ahead_power_p90", "day_ahead_power_p10",
                    "hour_ahead_power_p10", "4_hour_ahead_power_p10", "6_hour_ahead_power_p10"]
-#VALID_ATTRS = set(['wind_speed', 'wind_direction', 'power', 'temperature',
-#                  'pressure', 'density'])
 # Order per output csvfile from website
 # density at hub height (kg/m^3),power (MW),surface air pressure (Pa),air
 # temperature at 2m (K),wind direction at 100m (deg),wind speed at 100m (m/s)
 MET_ATTRS = ['density', 'power', 'pressure', 'temperature', 'wind_direction',
                'wind_speed']
-WIND_MET_DIR = "/projects/hpc-apps/wtk/data/hdf"
-WIND_MET_NC_DIR = "/projects/hpc-apps/wtk/data/met_data"
+S3_BUCKET = "pywtk-data"
+if 'PYWTK_CACHE_DIR' in os.environ:
+    # Set FCST and MET dirs appropriately
+    WIND_MET_NC_DIR = os.path.join(os.environ['PYWTK_CACHE_DIR'], "met_data")
+    WIND_FCST_DIR = os.path.join(os.environ['PYWTK_CACHE_DIR'], "fcst_data")
+    # HDF data not available in bucket yet
+    WIND_MET_DIR = os.path.join(os.environ['PYWTK_CACHE_DIR'], "hdf")
+    # Check for existing cache directories
+    for req_dir in [WIND_MET_NC_DIR, WIND_FCST_DIR]:
+        if not os.path.exists(req_dir):
+            # Warn that cache dir is being created
+            _logger.warning("Creating cache dir %s"%req_dir)
+            os.makedirs(req_dir)
+else:
+    # HPC directories
+    WIND_MET_NC_DIR = "/projects/hpc-apps/wtk/data/met_data"
+    WIND_FCST_DIR = "/projects/hpc-apps/wtk/data/fcst_data"
+    WIND_MET_DIR = "/projects/hpc-apps/wtk/data/hdf"
 
 H5_AVAILABLE_DATA_INTERVALS = [5, 60] #??? defined in two places with different values
 # name of the dataset containing time stamps
@@ -209,7 +222,22 @@ def get_nc_data(site_id, start, end, attributes=None, leap_day=True, utc=False, 
         elif nc_dir == WIND_MET_NC_DIR:
             attributes = MET_ATTRS
     site = int(site_id)
-    if nc_dir.startswith("s3://"):
+    if "PYWTK_CACHE_DIR" in os.environ:
+        import boto3
+        s3 =  boto3.client('s3')
+        site_file = os.path.join(nc_dir, str(int(site/500)), "%s.nc"%site)
+        #len(os.environ['PYWTK_CACHE_DIR'])
+        # Check for file in nc_dir
+        if not os.path.exists(site_file):
+            _logger.info("Downloading missing file %s"%site_file)
+            key = site_file[len(os.environ['PYWTK_CACHE_DIR']):].lstrip("/\\")
+            site_path = os.path.dirname(site_file)
+            if not os.path.exists(site_path):
+                _logger.info("Creating missing directory %s"%site_path)
+                os.makedirs(site_path)
+            # Download if missing to nc_dir
+            s3.download_file(Bucket=S3_BUCKET, Key=key, Filename=site_file)
+    elif nc_dir.startswith("s3://"):
         import boto3
         s3 =  boto3.client('s3')
         (bucket, directory) = nc_dir[5:].split("/", 1)
