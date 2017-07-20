@@ -48,10 +48,8 @@ cp /usr/lib64/libgeos-3.4.2.so /usr/lib64/libgeos_c.so.1.8.2.so lib
 
 4. Create deployment zip and upload code to S3
 
-  ```bash
+    ```bash
 zappa update dev
-
-
 (cd pywtk_virtenv/lib/python2.7/site-packages
     zip -r ../../../../pywtk_aws.zip dateutil pytz pywtk six.py)
 (cd pywtk_virtenv/lib64/python2.7/site-packages
@@ -86,7 +84,7 @@ aws lambda update-function-code \
 6. Wire lambda into API Gateway and test
 
   ```json
-    {"type": "site",
+{"type": "site",
  "sites": ["1001"]
 }
 ```
@@ -104,6 +102,7 @@ plotting.
 ## Available APIs
 
 * /sites - Wind site metadata
+
 ```
 Required parameters one of:
     site_id - list of site_ids
@@ -160,4 +159,26 @@ Optional parameters:
 
 Returns:
     dict of site id to json representation of dataframes
+```
+
+### Preparing Data
+AWS S3 has some peculiarities when dealing with publicly available data.  To
+enable anonymous download of data the bucket policy needs to be set:
+
+```json
+{
+  "Id": "Policy1500580520974",
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "Stmt1500580517505",
+      "Action": [
+        "s3:GetObject"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:s3:::pywtk-data/*",
+      "Principal": "*"
+    }
+  ]
+}
 ```

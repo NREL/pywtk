@@ -396,9 +396,10 @@ def site_from_cache(site_id, nc_dir):
         nc_dir - Directory to check for data
     '''
     import boto3
-    s3 =  boto3.client('s3')
+    from botocore import UNSIGNED
+    from botocore.client import Config
+    s3 =  boto3.client('s3', config=Config(signature_version=UNSIGNED))
     site_file = os.path.join(nc_dir, str(int(site_id/500)), "%s.nc"%site_id)
-    #len(os.environ['PYWTK_CACHE_DIR'])
     # Check for file in nc_dir
     if not os.path.exists(site_file):
         _logger.info("Downloading missing file %s"%site_file)
