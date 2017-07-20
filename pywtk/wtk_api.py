@@ -223,20 +223,7 @@ def get_nc_data(site_id, start, end, attributes=None, leap_day=True, utc=False, 
             attributes = MET_ATTRS
     site = int(site_id)
     if "PYWTK_CACHE_DIR" in os.environ:
-        import boto3
-        s3 =  boto3.client('s3')
-        site_file = os.path.join(nc_dir, str(int(site/500)), "%s.nc"%site)
-        #len(os.environ['PYWTK_CACHE_DIR'])
-        # Check for file in nc_dir
-        if not os.path.exists(site_file):
-            _logger.info("Downloading missing file %s"%site_file)
-            key = site_file[len(os.environ['PYWTK_CACHE_DIR']):].lstrip("/\\")
-            site_path = os.path.dirname(site_file)
-            if not os.path.exists(site_path):
-                _logger.info("Creating missing directory %s"%site_path)
-                os.makedirs(site_path)
-            # Download if missing to nc_dir
-            s3.download_file(Bucket=S3_BUCKET, Key=key, Filename=site_file)
+        site_file = site_from_cache(site, nc_dir)
     elif nc_dir.startswith("s3://"):
         import boto3
         s3 =  boto3.client('s3')
@@ -401,3 +388,25 @@ def get_nc_data_from_url(url, site_id, start, end, attributes, leap_day=True, ut
     #master_df.set_index(pandas.DatetimeIndex(master_df["datetime"]*10**6))
     # Return dataframe
     return master_df
+
+def site_from_cache(site_id, nc_dir):
+    '''Retrieve site file from cache, downloading from S3 if needed
+    Required Args:
+        site_id - (String or int) Wind site id.
+        nc_dir - Directory to check for data
+    '''
+    import boto3
+    s3 =  boto3.client('s3')
+    site_file = os.path.join(nc_dir, str(int(site_id/500)), "%s.nc"%site_id)
+    #len(os.environ['PYWTK_CACHE_DIR'])
+    # Check for file in nc_dir
+    if not os.path.exists(site_file):
+        _logger.info("Downloading missing file %s"%site_file)
+        key = site_file[len(os.environ['PYWTK_CACHE_DIR']):].lstrip("/\\")
+        site_path = os.path.dirname(site_file)
+        if not os.path.exists(site_path):
+            _logger.info("Creating missing directory %s"%site_path)
+            os.makedirs(site_path)
+        # Download if missing to nc_dir
+        s3.download_file(Bucket=S3_BUCKET, Key=key, Filename=site_file)
+    return site_file
