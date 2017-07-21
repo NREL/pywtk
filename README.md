@@ -14,6 +14,16 @@ source activate pywtk
 python setup.py install
 ```
 
+### Download data as needed
+Set an environment variable named PYWTK_CACHE_DIR to the directory where the
+data will reside and use the API as normal.  To find a directory where a
+specific site data resides use pywtk.wtk_api.site_from_cache:
+
+```python
+from pywtk.wtk_api import site_from_cache, WIND_FCST_DIR
+files = site_from_cache(12345, WIND_FCST_DIR)
+```
+
 ### Download wind data and use local copy
 The complete data set is 2.4 TB
 
