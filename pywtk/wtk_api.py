@@ -222,9 +222,7 @@ def get_nc_data(site_id, start, end, attributes=None, leap_day=True, utc=False, 
         elif nc_dir == WIND_MET_NC_DIR:
             attributes = MET_ATTRS
     site = int(site_id)
-    if "PYWTK_CACHE_DIR" in os.environ:
-        site_file = site_from_cache(site, nc_dir)
-    elif nc_dir.startswith("s3://"):
+    if nc_dir.startswith("s3://"):
         import boto3
         s3 =  boto3.client('s3')
         (bucket, directory) = nc_dir[5:].split("/", 1)
@@ -235,6 +233,8 @@ def get_nc_data(site_id, start, end, attributes=None, leap_day=True, utc=False, 
             #s3.download_fileobj(Bucket="pywtk-data", Key="met_data/0/90.nc", Fileobj=tfile)
             data = get_nc_data_from_file(tfile.name, start, end, attributes=attributes, leap_day=leap_day, utc=utc, site_id=site)
         return data
+    elif "PYWTK_CACHE_DIR" in os.environ:
+        site_file = site_from_cache(site, nc_dir)
     else:
         site_file = os.path.join(nc_dir, str(int(site/500)), "%s.nc"%site)
     _logger.info("Site file %s", site_file)
