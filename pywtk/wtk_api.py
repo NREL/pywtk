@@ -400,6 +400,7 @@ def site_from_cache(site_id, nc_dir):
     '''
     if "PYWTK_CACHE_DIR" not in os.environ:
         raise Exception("Set environment variable PYWTK_CACHE_DIR to utilize the cache")
+    site_id = int(site_id)
     import boto3
     from botocore import UNSIGNED
     from botocore.client import Config
@@ -407,7 +408,7 @@ def site_from_cache(site_id, nc_dir):
     site_file = os.path.join(nc_dir, str(int(site_id/500)), "%s.nc"%site_id)
     # Check for file in nc_dir
     if not os.path.exists(site_file):
-        _logger.info("Downloading missing file %s"%site_file)
+        _logger.warning("Downloading missing file %s"%site_file)
         key = site_file[len(os.environ['PYWTK_CACHE_DIR']):].lstrip("/\\")
         site_path = os.path.dirname(site_file)
         if not os.path.exists(site_path):
