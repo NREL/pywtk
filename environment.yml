@@ -11,4 +11,5 @@ dependencies:
  - pandas
  - psycopg2
  - shapely
+ - boto3
 
