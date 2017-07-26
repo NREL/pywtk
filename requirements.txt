@@ -1,0 +1,8 @@
+Cython
+flask
+h5py
+netCDF4
+pandas
+s3fs
+shapely
+zappa

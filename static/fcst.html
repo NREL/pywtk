@@ -1,0 +1,49 @@
+<html>
+    <head></head>
+    <body>
+        <h2>fcst</h2>
+<p>The fcst API allows selection of power forecast data over a period
+of time.</p>
+
+<b>Available Attributes</b>
+<ul>
+    <li>day_ahead_power</li>
+    <li>hour_ahead_power</li>
+    <li>4_hour_ahead_power</li>
+    <li>6_hour_ahead_power</li>
+    <li>day_ahead_power_p90</li>
+    <li>hour_ahead_power_p90</li>
+    <li>4_hour_ahead_power_p90</li>
+    <li>6_hour_ahead_power_p90</li>
+    <li>day_ahead_power_p10</li>
+    <li>hour_ahead_power_p10</li>
+    <li>4_hour_ahead_power_p10</li>
+    <li>6_hour_ahead_power_p10</li>
+</ul>
+
+<b>Request arguments</b>
+<p>Required parameters:</p>
+<ul>
+    <li>sites | wkt - string of comma-separated site_ids or Well known text geometry</li>
+    <li>start - unix timestamp of start time</li>
+    <li>end - unix timestamp of end time</li>
+</ul>
+
+<p>Optional parameters:</p>
+<ul>
+    <li>orient - Pandas dataframe to_json orientation, defaults to records:
+        split, records, index, columns or values
+        See Pandas documentation for more info</li>
+    <li>max_point_return - Maximum number of closest sites to a POINT wkt, defaults
+        to 1.  Will be ignored for all other cases.</li>
+    <li>attributes - string attributes separated by commas to return, will fail
+                 if attribute is not valid for the data set</li>
+    <li>leap_day - Bool to include leap day.  Defaults to True</li>
+    <li>utc - Bool to use UTC rather than site local time.  Defaults to True</li>
+</ul>
+
+<p><b>Response data</b></p>
+    dict of site id to json representation of dataframes
+
+    </body>
+</html>

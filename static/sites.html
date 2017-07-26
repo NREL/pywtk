@@ -1,0 +1,44 @@
+<html>
+    <head></head>
+    <body>
+        <h2>sites</h2>
+<p>The sites API allows selection of wind sites based on either site id, closest
+sites to a point, or sites within a polygon.  It requires geolocation strings that
+conform to the Well-Known Text (WKT) standard.</p>
+
+<b>Request arguments</b>
+<p>Required parameters one of:</p>
+<ul>
+    <li>sites - string of site_ids separated by commas</li>
+    <li>wkt - Well known text</li>
+</ul>
+
+<p>Optional parameters:</p>
+<ul>
+    <li>orient - Pandas dataframe to_json orientation, defaults to records:
+        split, records, index, columns or values
+        See Pandas documentation for more info</li>
+    <li>max_point_return - Maximum number of closest sites to a POINT wkt, defaults
+        to 1.  Will be ignored for all other cases.</li>
+</ul>
+
+<b>Response data</b>
+<p>List of:</p>
+<ul>
+<li>site_id</li>
+<li>gid</li>
+<li>fraction_of_usable_area</li>
+<li>power_curve</li>
+<li>capacity</li>
+<li>wind_speed</li>
+<li>capacity_factor</li>
+<li>the_geom</li>
+<li>city</li>
+<li>state</li>
+<li>country</li>
+<li>elevation</li>
+<li>lat</li>
+<li>lon</li>
+</ul>
+    </body>
+</html>

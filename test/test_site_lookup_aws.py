@@ -1,5 +1,7 @@
+import os
 from unittest import TestCase
 
+os.environ['DATA_BUCKET'] = 'pywtk-data'
 from pywtk.site_lookup import get_3tiersites_from_wkt
 
 class SiteLookupTest(TestCase):
