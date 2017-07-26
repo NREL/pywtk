@@ -61,7 +61,7 @@ Then open your browser to http://localhost:8888/
 ## Available data and how to access it
 * Wind site metadata
 
-  ```bash
+```bash
 $ python -c "import pywtk.site_lookup; print(pywtk.site_lookup.sites.ix[11222])"
 gid                                                                    11223
 fraction_of_usable_area                                                    1
@@ -79,7 +79,7 @@ Name: 11222, dtype: object
 ```
 * Wind site timezones
 
-  ```bash
+```bash
 $ python -c "import pywtk.site_lookup; print(pywtk.site_lookup.timezones.ix[11222])"
 abbreviation                    CDT
 countryCode                      US
@@ -95,19 +95,19 @@ Name: 11222, dtype: object
 ```
 * Available met data attributes
 
-  ```bash
+```bash
 $ python -c "import pywtk.wtk_api; print pywtk.wtk_api.MET_ATTRS"
 ['density', 'power', 'pressure', 'temperature', 'wind_direction', 'wind_speed']
 ```
 * Available forecast data attributes
 
-  ```bash
+```bash
 $ python -c "import pywtk.wtk_api; print pywtk.wtk_api.FORECAST_ATTRS"
 ['day_ahead_power', 'hour_ahead_power', '4_hour_ahead_power', '6_hour_ahead_power', 'day_ahead_power_p90', 'hour_ahead_power_p90', '4_hour_ahead_power_p90', '6_hour_ahead_power_p90', 'day_ahead_power_p10', 'hour_ahead_power_p10', '4_hour_ahead_power_p10', '6_hour_ahead_power_p10']
 ```
 * Lookup sites within a Well Known Text rectangle descriptor
 
-  ```bash
+```bash
 $ python -c "import pywtk.site_lookup; in_sites = pywtk.site_lookup.get_3tiersites_from_wkt('POLYGON((-120.82 34.4,-119.19 34.4,-119.19 33.92,-120.82 33.92,-120.82 34.4))'); print in_sites.index.values"
 [29375 29733 29872 30019 30190 30539 30712 30713 30874 31032 31033 31189
  31192 31320 31321 31322 31323 31324 31563 32060 32834 33203 30873 31034
@@ -115,13 +115,13 @@ $ python -c "import pywtk.site_lookup; in_sites = pywtk.site_lookup.get_3tiersit
 ```
 * Lookup the three nearest sites to a Well Known Text point
 
-  ```bash
+```bash
 python -c "import pywtk.site_lookup; sorted_sites = pywtk.site_lookup.get_3tiersites_from_wkt('POINT(-103.12 40.24)'); print sorted_sites.index.values[:3]"
 [53252 52873 54322]
 ```
 * Retrieval of met data for multiple sites for a Well Known Text descriptor for specified attributes and year
 
-  ```python
+```python
 import pandas
 import pywtk.wtk_api
 wkt = 'POLYGON((-120.82 34.4,-119.19 34.4,-119.19 33.92,-120.82 33.92,-120.82 34.4))'
@@ -144,7 +144,7 @@ None
 ```
 * Retrieval of met data for a single site for specified attributes and timespan
 
-  ```python
+```python
 import pandas
 import pywtk.wtk_api
 start = pandas.Timestamp('2007-08-01', tz='utc')
@@ -153,7 +153,8 @@ attributes = ['power', 'wind_speed']
 wind_data = pywtk.wtk_api.get_wind_data(102445, start, end, attributes=attributes)
 print(wind_data.info())
 ```
-  ```text
+
+```text
 <class 'pandas.core.frame.DataFrame'>
 DatetimeIndex: 4033 entries, 2007-07-31 20:00:00-04:00 to 2007-08-14 20:00:00-04:00
 Data columns (total 2 columns):
@@ -163,9 +164,10 @@ dtypes: float64(2)
 memory usage: 94.5 KB
 None
 ```
+
 * Retrieval of forecast data for multiple sites for a Well Known Text descriptor for specified attributes and years
 
-  ```python
+```python
 import pandas
 import pywtk.wtk_api
 wkt = 'POLYGON((-120.82 34.4,-119.19 34.4,-119.19 33.92,-120.82 33.92,-120.82 34.4))'
@@ -189,7 +191,7 @@ None
 
 * Retrieval of forecast data for a single site for specified attributes and timespan
 
-  ```python
+```python
 import pandas
 import pywtk.wtk_api
 start = pandas.Timestamp('2007-08-01', tz='utc')
@@ -198,7 +200,8 @@ attributes = ['hour_ahead_power', 'day_ahead_power']
 wind_data = pywtk.wtk_api.get_forecast_data(102445, start, end, attributes=attributes)
 print(wind_data.info())
 ```
-  ```text
+
+```text
 <class 'pandas.core.frame.DataFrame'>
 DatetimeIndex: 337 entries, 2007-07-31 20:00:00-04:00 to 2007-08-14 20:00:00-04:00
 Data columns (total 2 columns):
