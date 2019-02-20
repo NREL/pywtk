@@ -224,7 +224,9 @@ def get_nc_data(site_id, start, end, attributes=None, leap_day=True, utc=False, 
     site = int(site_id)
     if nc_dir.startswith("s3://"):
         import boto3
-        s3 =  boto3.client('s3')
+        from botocore import UNSIGNED
+        from botocore.client import Config
+        s3 =  boto3.client('s3', config=Config(signature_version=UNSIGNED))
         (bucket, directory) = nc_dir[5:].split("/", 1)
         key = os.path.join(directory, str(int(site/500)), "%s.nc"%site)
         _logger.info("Attempting to download from s3 bucket %s key %s", bucket, key)
