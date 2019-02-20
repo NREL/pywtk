@@ -12,4 +12,4 @@ dependencies:
  - psycopg2
  - shapely
  - boto3
-
+ - s3fs
