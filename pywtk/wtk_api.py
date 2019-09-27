@@ -21,7 +21,7 @@ FORECAST_ATTRS = [ "day_ahead_power", "hour_ahead_power", "4_hour_ahead_power",
 # temperature at 2m (K),wind direction at 100m (deg),wind speed at 100m (m/s)
 MET_ATTRS = ['density', 'power', 'pressure', 'temperature', 'wind_direction',
                'wind_speed']
-S3_BUCKET = "pywtk-data"
+S3_BUCKET = "nrel-pds-wtk/wtk-techno-economic/pywtk-data"
 if 'PYWTK_CACHE_DIR' in os.environ:
     # Set FCST and MET dirs appropriately
     WIND_MET_NC_DIR = os.path.join(os.environ['PYWTK_CACHE_DIR'], "met_data")
