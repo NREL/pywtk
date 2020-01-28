@@ -1,13 +1,15 @@
 import calendar
 import csv
+import hashlib
 import numpy
 import os
 import pandas
+import tempfile
 import time
 from unittest import TestCase, skip
 from zipfile import ZipFile
 
-from pywtk.wtk_api import get_nc_data
+from pywtk.wtk_api import get_nc_data, site_from_cache
 
 class TestAWSData(TestCase):
     def test_aws_wind_data(self):
@@ -33,7 +35,25 @@ class TestAWSData(TestCase):
         expected = [15.35958480834961, 318.1243896484375, 11.844223022460938, 259.5919494628906, 85467.6875, 1.132704496383667]
         #expected_dict = dict(zip(["density", "power", "pressure", "temperature", "wind_direction", "wind_speed"], first_line[5:]))
         expected_dict = dict(zip(['power', 'wind_direction', 'wind_speed', 'temperature', 'pressure', 'density'], expected))
-        self.assertEqual(expected_dict, wind_data.ix[0].to_dict())
+        self.assertEqual(expected_dict, wind_data.iloc[0].to_dict())
         #print map(float, wind_data.ix[0].values)
         #print wind_data.columns.values
         self.assertEqual(365*24*12, len(wind_data))
+
+    def test_site_from_cache(self):
+        '''Excercise AWS S3 bucket and caching functionality
+        '''
+        with tempfile.TemporaryDirectory() as tempdir:
+            os.environ["PYWTK_CACHE_DIR"] = tempdir
+            site_id = 53252
+            nc_dir = os.path.join(tempdir, "met_data")
+            site_file = site_from_cache(site_id, nc_dir)
+            BUF_SIZE = 65536
+            sha1 = hashlib.sha1()
+            with open(site_file, 'rb') as f:
+                while True:
+                    data = f.read(BUF_SIZE)
+                    if not data:
+                        break
+                    sha1.update(data)
+            self.assertEqual("0b2e4c3674dc5e0c4494964ae57988ee89a61f78", sha1.hexdigest())

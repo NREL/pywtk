@@ -12,6 +12,7 @@ from zipfile import ZipFile
 from pywtk.site_lookup import get_3tiersites_from_wkt, timezones, sites
 
 _logger = logging.getLogger(__name__)
+# logging.basicConfig(level=logging.INFO)
 FORECAST_ATTRS = [ "day_ahead_power", "hour_ahead_power", "4_hour_ahead_power",
                    "6_hour_ahead_power", "day_ahead_power_p90", "hour_ahead_power_p90",
                    "4_hour_ahead_power_p90", "6_hour_ahead_power_p90", "day_ahead_power_p10",
@@ -21,7 +22,8 @@ FORECAST_ATTRS = [ "day_ahead_power", "hour_ahead_power", "4_hour_ahead_power",
 # temperature at 2m (K),wind direction at 100m (deg),wind speed at 100m (m/s)
 MET_ATTRS = ['density', 'power', 'pressure', 'temperature', 'wind_direction',
                'wind_speed']
-S3_BUCKET = "nrel-pds-wtk/wtk-techno-economic/pywtk-data"
+S3_BUCKET = "nrel-pds-wtk"
+S3_KEYDIR = "wtk-techno-economic/pywtk-data"
 if 'PYWTK_CACHE_DIR' in os.environ:
     # Set FCST and MET dirs appropriately
     WIND_MET_NC_DIR = os.path.join(os.environ['PYWTK_CACHE_DIR'], "met_data")
@@ -80,7 +82,7 @@ def get_wind_data_by_wkt(wkt, names, attributes=None, interval=5, leap_day=True,
         raise Exception("Invalid data to retrieve: %s"%type)
     ret_dict = {}
     for site_id in get_3tiersites_from_wkt(wkt).index.values:
-        site_tz = timezones.ix[site_id]['zoneName']
+        site_tz = timezones.iloc[site_id]['zoneName']
         _logger.info("Site %s is in %s", site_id, site_tz)
         ret_df = pandas.DataFrame()
         for year in names:
@@ -125,7 +127,7 @@ def get_wind_data(site_id, start, end, attributes=None, leap_day=True, utc=False
     site_id = int(site_id)
     if attributes is None:
         attributes = MET_ATTRS
-    site_tz = timezones.ix[site_id]['zoneName']
+    site_tz = timezones.iloc[site_id]['zoneName']
     _logger.info("Site %s is in %s", site_id, site_tz)
     ret_df = pandas.DataFrame()
     _logger.info("utc is %s", utc)
@@ -278,7 +280,7 @@ def get_nc_data_from_file(filename, start, end, attributes=None, leap_day=True, 
             site = int(site_id)
         except:
             raise Exception("Unable to determine site id from filename, should be format of site_id.nc")
-    site_tz = timezones.ix[site]['zoneName']
+    site_tz = timezones.iloc[site]['zoneName']
     _logger.info("Site %s is in %s", site_id, site_tz)
     if utc == False and site_tz is None:
         raise Exception("Use utc=True for sites without defined timezones")
@@ -295,18 +297,18 @@ def get_nc_data_from_file(filename, start, end, attributes=None, leap_day=True, 
     end_idx = min(data_size, int(math.floor((end_time - nc.start_time)/float(nc.sample_period))) + 1)
     _logger.info("Reading %s:%s", start_idx, end_idx)
     ret_df = pandas.DataFrame()
-    ret_df['datetime'] = numpy.arange((nc.start_time + start_idx * int(nc.sample_period)) * 10 ** 9,
-                                      (nc.start_time + end_idx * int(nc.sample_period)) * 10 ** 9,
-                                      int(nc.sample_period) * 10 ** 9)
+    ret_df['datetime'] = numpy.arange((nc.start_time + start_idx * float(nc.sample_period)) * 10 ** 9,
+                                      (nc.start_time + end_idx * float(nc.sample_period)) * 10 ** 9,
+                                      float(nc.sample_period) * 10 ** 9)
     # Someone with better pandas skills will code this nicer
     ret_df.index = pandas.to_datetime(ret_df.pop('datetime'))
     ret_df.index = ret_df.index.tz_localize('utc')
-    if utc == False:
+    if not utc:
         ret_df.index = ret_df.index.tz_convert(site_tz)
     _logger.info("Attributes are %s", attributes)
     for atrb in attributes:
         ret_df[atrb] = nc[atrb][start_idx:end_idx]
-    if leap_day == False:
+    if not leap_day:
         ret_df = ret_df[~((ret_df.index.month == 2) & (ret_df.index.day == 29))]
     return ret_df
 
@@ -406,12 +408,14 @@ def site_from_cache(site_id, nc_dir):
     import boto3
     from botocore import UNSIGNED
     from botocore.client import Config
-    s3 =  boto3.client('s3', config=Config(signature_version=UNSIGNED))
-    site_file = os.path.join(nc_dir, str(int(site_id/500)), "%s.nc"%site_id)
+    _logger.info("site_from_cache: nc_dir is %s", nc_dir)
+    s3 = boto3.client('s3', config=Config(signature_version=UNSIGNED))
+    site_file = os.path.join(nc_dir, str(int(site_id/500)), "%s.nc" % site_id)
+    site_file_unix = site_file.replace("\\", "/")
     # Check for file in nc_dir
     if not os.path.exists(site_file):
         _logger.warning("Downloading missing file %s"%site_file)
-        key = site_file[len(os.environ['PYWTK_CACHE_DIR']):].lstrip("/\\")
+        key = S3_KEYDIR + '/' + site_file_unix[len(os.environ['PYWTK_CACHE_DIR']):].lstrip("/\\")
         site_path = os.path.dirname(site_file)
         if not os.path.exists(site_path):
             _logger.info("Creating missing directory %s"%site_path)
