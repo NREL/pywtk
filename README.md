@@ -28,7 +28,7 @@ files = site_from_cache(12345, WIND_FCST_DIR)
 The complete data set is 2.4 TB
 
 ```bash
-aws s3 sync s3://pywtk-data/ /local-data-dir/
+aws s3 sync --dryrun --no-sign-request s3://nrel-pds-wtk/wtk-techno-economic/pywtk-data /local-data-dir/
 ```
 
 * Modify pywtk/wtk_api.py in your source then run python setup.py install
