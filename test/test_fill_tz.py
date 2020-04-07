@@ -11,7 +11,7 @@ class TimezoneTest(TestCase):
         #Longitude, -70.708649
         #Latitude, 41.744591
         tz = get_tz_for_site("102445")
-        print tz
+        print(tz)
         save_tz_to_file("output_test_tz_for_site.csv")
         # This command will loop forever
         fill_tz("site_timezone.csv")

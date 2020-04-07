@@ -58,6 +58,6 @@ class TestWebsiteEquiv(TestCase):
         ''' Extra cruft
         &site_url=wind-toolkit%2Fwind%2Fwtk_download.json&full_name=Your+Name&email=your.email%40here&affiliation=NREL&mailing_list=false&reason=Development+testing
         '''
-        print "CO save data"
-        wind_data = get_wind_data(wkt, names, attributes=attributes, leap_day=leap_day, utc=utc)
-        save_wind_data({"53252":wind_data}, "output_CO_test_point_2011_utc.zip")
+        #print "CO save data"
+        #wind_data = get_wind_data(wkt, names, attributes=attributes, leap_day=leap_day, utc=utc)
+        #save_wind_data({"53252":wind_data}, "output_CO_test_point_2011_utc.zip")
