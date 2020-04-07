@@ -1,19 +1,23 @@
 # Flask setup
 from flask import Flask, json, request, jsonify, send_from_directory
+import os
 import pandas
 #from pywtk.site_lookup import get_3tiersites_from_wkt, timezones, sites
 import pywtk.site_lookup
 from pywtk.wtk_api import get_nc_data, FORECAST_ATTRS, MET_ATTRS
 
-MET_LOC = "s3://pywtk-data/met_data"
-FCST_LOC = "s3://pywtk-data/fcst_data"
+DATA_BUCKET = os.environ["DATA_BUCKET"]
+MET_LOC = "s3://%s/met_data" % (DATA_BUCKET)
+FCST_LOC = "s3://%s/fcst_data" % (DATA_BUCKET)
 
 app = Flask(__name__)
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
 
+
 @app.route("/")
 def heartbeat():
     return send_from_directory('static', 'index.html')
+
 
 def get_sites_from_request(request):
     '''Return sites from a list of site_ids or within a WKT definition.
@@ -43,10 +47,12 @@ def get_sites_from_request(request):
     else:
         raise Exception("Must define either wkt containing sites or a list of sites")
 
+
 def boolean_type(in_str):
     '''Return True or False based on string input
     '''
     return in_str.lower() in ['true', 'y', '1', 'yes', 't']
+
 
 @app.route("/sites")
 def sites_request():
@@ -76,6 +82,7 @@ def sites_request():
     if orient not in ["split", "records", "index", "columns", "values"]:
         return jsonify({"success": False, "message": "Orient must be one of split, records, index, columns or values"}), 400
     return sites.to_json(orient=orient)
+
 
 @app.route("/met")
 def met_data():
@@ -116,7 +123,6 @@ def met_data():
                 return jsonify({"success": False, "message": "Attributes must be a subset of %s"%MET_ATTRS}), 400
         else:
             attributes = MET_ATTRS
-
         ret_dict = {}
         for site_id in sites['site_id']:
             #ret_dict[site_id] = get_wind_data(site_id, start, end).to_json()
@@ -124,6 +130,7 @@ def met_data():
         return jsonify(ret_dict)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 400
+
 
 @app.route("/fcst")
 def fcst_data():
@@ -169,7 +176,6 @@ def fcst_data():
         return jsonify(ret_dict)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 400
-
 
 
 if __name__ == '__main__':
