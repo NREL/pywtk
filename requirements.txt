@@ -2,7 +2,11 @@ Cython
 flask
 h5py
 netCDF4
+nose
 pandas
 s3fs
 shapely
 zappa
+# Zappa issues below
+Werkzeug<1.0
+python-dateutil<2.7.0
