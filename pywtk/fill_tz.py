@@ -29,7 +29,7 @@ try:
             cur.execute("INSERT OR IGNORE INTO timezone (%s) VALUES (%s)"%(", ".join(fields), ",".join(["?" for f in fields])), row)
             con.commit()
 except:
-    print "No site timezone data"
+    print("No site timezone data")
     traceback.print_exc()
 
 
@@ -84,7 +84,7 @@ def get_tz_for_site(site_id):
         cur.execute("INSERT OR IGNORE INTO timezone (%s) VALUES (%s)"%(",".join(["site_id"]+TZ_FIELDS), ",".join(["'%s'"%site_id]+["'%s'"%result[f] for f in TZ_FIELDS])))
         con.commit()
     except:
-        print "Bad data"
+        print("Bad data")
         traceback.print_exc()
         raise Exception
     return result
@@ -106,7 +106,7 @@ def fill_tz(filename):
                    WHERE site_id NOT IN (SELECT site_id FROM timezone)
                    ORDER BY CAST(site_id AS INTEGER) ASC""")
     missing = [m[0] for m in cur.fetchall()]
-    print "Missing %s sites"%len(missing)
+    print("Missing %s sites"%len(missing))
     sys.stdout.write('Starting queries')
     sys.stdout.flush()
     try:
@@ -123,17 +123,17 @@ def fill_tz(filename):
             try:
                 get_tz_for_site(s)
             except:
-                print "Problem with get_tz_for_site"
+                print("Problem with get_tz_for_site")
                 traceback.print_exc()
                 break
             time.sleep(1.1) # API limit is 1 per second, playing it safe to avoid lockout
             count += 1
     except:
-        print "Problem with fill_tz"
+        print("Problem with fill_tz")
         traceback.print_exc()
     finally:
         save_tz_to_file(filename)
-    print "\nPulled %s sites"%count
+    print("\nPulled %s sites"%count)
 
 def main():
     #get_tz_for_site(sys.argv[1])

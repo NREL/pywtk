@@ -1,5 +1,5 @@
 dependencies:
- - python=2
+ - python
  - flask
  - h5py
  - jupyter

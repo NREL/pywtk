@@ -95,7 +95,8 @@ def get_wind_data_by_wkt(wkt, names, attributes=None, interval=5, leap_day=True,
                 min_dt = pandas.Timestamp('%s-01-01'%year, tz='utc')
                 max_dt = pandas.Timestamp('%s-12-31 23:59:59'%year, tz='utc')
             #ret_df = ret_df.append(data_function(site_id, min_dt, max_dt, attributes, leap_day, utc))
-            ret_df = ret_df.append(get_nc_data(site_id, min_dt, max_dt, attributes, leap_day, utc, data_dir))
+            #ret_df = ret_df.append(get_nc_data(site_id, min_dt, max_dt, attributes, leap_day, utc, data_dir))
+            ret_df = pandas.concat([ret_df, get_nc_data(site_id, min_dt, max_dt, attributes, leap_day, utc, data_dir)], ignore_index=True)
         ret_dict[site_id] = ret_df
         # Break on POINT as it will return all sites in order of distance to the
         # wkt point
@@ -155,7 +156,8 @@ def get_wind_data(site_id, start, end, attributes=None, leap_day=True, utc=False
                     year_df[attr] = h5_file[attr][:,int(site_id)] * scale
                 year_df = year_df.truncate(before=min_dt, after=max_dt)
                 _logger.info("year_df shape is %s", repr(year_df.shape))
-                ret_df = ret_df.append(year_df)
+                # ret_df = ret_df.append(year_df)
+                ret_df = pandas.concat([ret_df, year_df], ignore_index=True)
         if leap_day == False:
             ret_df = ret_df[~((ret_df.index.month == 2) & (ret_df.index.day == 29))]
     elif source == "nc":
